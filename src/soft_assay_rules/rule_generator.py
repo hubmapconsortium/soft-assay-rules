@@ -7,8 +7,12 @@ from collections import defaultdict
 
 ASSAY_TYPES_YAML = 'assay_types.yaml'
 
-INGEST_VALIDATION_TABLE_PATH = '../validation/ingest_validation_tools/src/ingest_validation_tools/table-schemas/assays'
-INGEST_VALIDATION_DIR_SCHEMA_PATH = '../validation/ingest_validation_tools/src/ingest_validation_tools/directory-schemas'
+INGEST_VALIDATION_TOOLS_PATH = (Path(__file__).parent.parent.parent
+                                / 'submodules' / 'ingest-validation-tools')
+INGEST_VALIDATION_TABLE_PATH = (INGEST_VALIDATION_TOOLS_PATH / 'src' / 'ingest_validation_tools'
+                                / 'table-schemas' / 'assays')
+INGEST_VALIDATION_DIR_SCHEMA_PATH = (INGEST_VALIDATION_TOOLS_PATH / 'src' / 'ingest_validation_tools'
+                                     / 'directory-schemas')
 
 SCHEMA_SPLIT_REGEX = r'(.+)-v(\d)'
 
