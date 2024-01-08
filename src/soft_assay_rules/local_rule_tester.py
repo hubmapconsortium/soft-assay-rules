@@ -29,7 +29,8 @@ rule_chain = None
 
 def initialize_rule_chain():
     global rule_chain
-    with open(CHAIN_INPUT_PATH) as chain_file:
+    localized_chain_input_path = (Path(__file__).resolve().parent / CHAIN_INPUT_PATH).resolve()
+    with open(localized_chain_input_path) as chain_file:
         rule_chain = RuleLoader(chain_file).load()
 
 
