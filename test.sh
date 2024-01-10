@@ -2,9 +2,15 @@
 set -o errexit
 die() { set +v; echo "$*" 1>&2 ; exit 1; }
 
-# TODO: If you are using multiple testing tools,
-# it may be useful to give developers a single script that runs everything locally.
-#
-# Do not recommend referencing this script from the Github workflows:
-# They will run faster and the results will be easier to read
-# if separate tests have separate workflows.
+red="$(tput setaf 1)"
+green="$(tput setaf 2)"
+reset="$(tput sgr0)"
+
+start() { [[ -z "$CI" ]] || echo "travis_fold:start:$1"; echo "$green$1$reset"; }
+end() { [[ -z "$CI" ]] || echo "travis_fold:end:$1"; }
+die() { set +v; echo "$red$*$reset" 1>&2 ; exit 1; }
+
+
+start placeholder
+python tests/pytest_runner.py
+end placeholder
