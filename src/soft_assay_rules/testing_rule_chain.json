@@ -109,7 +109,7 @@
     },
     {
         "type": "match",
-        "match": "not_dcwg and is_derived and data_types[0] in ['image_pyramid', 'Image Pyramid']",
+        "match": "not_dcwg and is_derived and data_types[0] in ['image_pyramid', 'Image Pyramid', 'ometiff_pyramid_ims', 'ometiff_pyramid']",
         "value": "{'assaytype': 'image_pyramid', 'vitessce-hints': ['is_image', 'pyramid', 'is_support'], 'primary': false, 'contains-pii': false, 'description': 'Image Pyramid'}",
         "rule_description": "non-DCWG derived image_pyramid"
     },
@@ -253,7 +253,7 @@
     },
     {
         "type": "match",
-        "match": "not_dcwg and is_derived and data_types[0] in ['publication_ancillary']",
+        "match": "not_dcwg and is_derived and data_types[0] in ['publication_ancillary', 'gen_pub_ancillary']",
         "value": "{'assaytype': 'publication_ancillary', 'vitessce-hints': ['json', 'is_support'], 'primary': false, 'contains-pii': false, 'description': 'Publication Data [ancillary]'}",
         "rule_description": "non-DCWG derived publication_ancillary"
     },
@@ -319,7 +319,7 @@
     },
     {
         "type": "match",
-        "match": "not_dcwg and is_derived and data_types[0] in ['salmon_rnaseq_10x']",
+        "match": "not_dcwg and is_derived and data_types[0] in ['salmon_rnaseq_10x', 'salmon_rnaseq_10x_v2']",
         "value": "{'assaytype': 'salmon_rnaseq_10x', 'vitessce-hints': ['is_sc', 'rna'], 'primary': false, 'contains-pii': false, 'description': 'scRNA-seq (10x Genomics) [Salmon]'}",
         "rule_description": "non-DCWG derived salmon_rnaseq_10x"
     },
@@ -379,7 +379,7 @@
     },
     {
         "type": "match",
-        "match": "not_dcwg and is_derived and data_types[0] in ['sn_atac_seq', 'sn_atac_seq_multiome_10x']",
+        "match": "not_dcwg and is_derived and data_types[0] in ['sn_atac_seq', 'sn_atac_seq_multiome_10x', 'sc_atac_seq_sn', 'sc_atac_seq_multiome_10x']",
         "value": "{'assaytype': 'sn_atac_seq', 'vitessce-hints': ['is_sc', 'atac'], 'primary': false, 'contains-pii': false, 'description': 'snATAC-seq [SnapATAC]'}",
         "rule_description": "non-DCWG derived sn_atac_seq"
     },
@@ -397,7 +397,7 @@
     },
     {
         "type": "match",
-        "match": "not_dcwg and is_derived and data_types[0] in ['salmon_sn_rnaseq_10x', 'salmon_rnaseq_10x_sn']",
+        "match": "not_dcwg and is_derived and data_types[0] in ['salmon_sn_rnaseq_10x', 'salmon_rnaseq_10x_sn', 'salmon_rnaseq_10x_v2_sn']",
         "value": "{'assaytype': 'salmon_sn_rnaseq_10x', 'vitessce-hints': ['is_sc', 'rna'], 'primary': false, 'contains-pii': false, 'description': 'snRNA-seq [Salmon]'}",
         "rule_description": "non-DCWG derived salmon_sn_rnaseq_10x"
     },

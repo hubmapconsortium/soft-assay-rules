@@ -102,7 +102,7 @@ DESI_pyramid:
 
 image_pyramid:
     description: Image Pyramid
-    alt-names: ["Image Pyramid"]
+    alt-names: ["Image Pyramid", "ometiff_pyramid_ims", "ometiff_pyramid"]
     primary: false
     vis-only: true
     contains-pii: false
@@ -310,7 +310,7 @@ publication:
 
 publication_ancillary:
   description: Publication Data [ancillary]
-  alt-names: []
+  alt-names: ['gen_pub_ancillary']
   primary: false
   contains-pii: false
   vis-only: true
@@ -400,7 +400,7 @@ salmon_rnaseq_10x:
 #scRNA-Seq-10x_salmon:
     description: scRNA-seq (10x Genomics) [Salmon]
 #    alt-names: [salmon_rnaseq_10x]
-    alt-names: []
+    alt-names: [salmon_rnaseq_10x_v2]
     primary: false
     contains-pii: false
     vitessce-hints: ['is_sc', 'rna']
@@ -478,7 +478,7 @@ sn_atac_seq:
 #snATACseq_snapATAC:
     description: snATAC-seq [SnapATAC]
 #    alt-names: [sn_atac_seq]
-    alt-names: [sn_atac_seq_multiome_10x]
+    alt-names: [sn_atac_seq_multiome_10x, sc_atac_seq_sn, sc_atac_seq_multiome_10x]
     primary: false
     contains-pii: false
     vitessce-hints: ['is_sc', 'atac']
@@ -501,7 +501,7 @@ snRNAseq-10xGenomics-v3:
 
 salmon_sn_rnaseq_10x:
     description: snRNA-seq [Salmon]
-    alt-names: ['salmon_rnaseq_10x_sn']
+    alt-names: ['salmon_rnaseq_10x_sn', 'salmon_rnaseq_10x_v2_sn']
     primary: false
     contains-pii: false
     vitessce-hints: ['is_sc', 'rna']
