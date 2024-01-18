@@ -270,6 +270,7 @@ def main() -> None:
                        f" 'description': '{description}',"
                        f" 'contains-pii': true,"
                        f" 'primary': true,"
+                       f" 'dataset-type': '{data_type}',"
                        f" 'must-contain': [{must_contain_str}]"
                        "}"
                        ),
@@ -293,6 +294,7 @@ def main() -> None:
                        f" 'description': '{description}',"
                        f" 'contains-pii': true,"
                        f" 'primary': true,"
+                       f" 'dataset-type': '{data_type}',"
                        f" 'must-contain': [{must_contain_str}]"
                        "}"
                        ),
@@ -338,6 +340,7 @@ def main() -> None:
                        f" 'dir-schema': '{schema}',"
                        f" 'contains-pii': true,"
                        f" 'primary': true,"
+                       f" 'dataset-type': '{data_type}',"
                        f" 'description': '{description}'"
                        "}"
                        ),
@@ -361,6 +364,7 @@ def main() -> None:
                        f" 'dir-schema': '{schema}',"
                        f" 'contains-pii': true,"
                        f" 'primary': true,"
+                       f" 'dataset-type': '{data_type}',"
                        f" 'description': '{description}'"
                        "}"
                        ),
@@ -381,6 +385,7 @@ def main() -> None:
                    " 'dir-schema': 'atacseq-v2',"
                    f" 'contains-pii': true,"
                    f" 'primary': true,"
+                   f" 'dataset-type': 'ATACseq',"
                    f" 'description': 'sciATAC-seq'"
                    "}"
                    ),
@@ -404,6 +409,7 @@ def main() -> None:
                        f" 'dir-schema': '{schema}',"
                        f" 'contains-pii': false,"
                        f" 'primary': true,"
+                       f" 'dataset-type': 'Histology',"
                        f" 'description': '{description}'"
                        "}"
                        ),
@@ -443,6 +449,7 @@ def main() -> None:
                        f" 'dir-schema': '{schema}',"
                        f" 'contains-pii': false,"
                        f" 'primary': true,"
+                       f" 'dataset-type': '{data_type}',"
                        f" 'description': '{description}'"
                        "}"
                        ),
