@@ -5,7 +5,7 @@ from pathlib import Path
 from pprint import pprint
 from collections import defaultdict
 
-ASSAY_TYPES_YAML = 'assay_types.yaml'
+ASSAY_TYPES_YAML = 'src/soft_assay_rules/assay_types.yaml'
 
 INGEST_VALIDATION_TOOLS_PATH = (Path(__file__).parent.parent.parent
                                 / 'submodules' / 'ingest-validation-tools')
@@ -16,7 +16,7 @@ INGEST_VALIDATION_DIR_SCHEMA_PATH = (INGEST_VALIDATION_TOOLS_PATH / 'src' / 'ing
 
 SCHEMA_SPLIT_REGEX = r'(.+)-v(\d)'
 
-CHAIN_OUTPUT_PATH = 'testing_rule_chain.json'
+CHAIN_OUTPUT_PATH = 'src/soft_assay_rules/testing_rule_chain.json'
 
 PREAMBLE = [
     {"type": "note",
@@ -315,7 +315,7 @@ def main() -> None:
             ('RNAseq', None, 'single cell', 'Read 1', 16, 0, 'Read 1', 12, 16, 'scRNAseq-10xGenomics-v3', 'scRNA-seq (10x Genomics v3)', 'rnaseq-v2'),
             ('RNAseq', None, 'single nucleus', 'Read 1', 16, 0, 'Read 1', 12, 16, 'snRNAseq-10xGenomics-v3', 'snRNA-seq (10x Genomics v3)', 'rnaseq-v2'),
             ('ATACseq', None, 'single nucleus', 'Read 2', 16, 0, 'Not applicable', "'Not applicable'", "'Not applicable'", 'snATACseq', 'snATAC-seq', 'atacseq-v2'),
-            ('ATACseq', None, 'single nucleus', 'Read 2', 24, "'0,38,76'", 'Read 2', 10, 84, 'SNARE-ATACseq2', 'snATACseq (SNARE-seq2)', 'atacseq-v2'),
+            ('ATACseq', None, 'single nucleus', 'Read 2', "'8,8,8'", "'0,38,76'", 'Not applicable', "'Not applicable'", "'Not applicable'", 'SNARE-ATACseq2', 'snATACseq (SNARE-seq2)', 'atacseq-v2'),
             ('ATACseq', None, 'single nucleus', 'Read 2', 16, 8, 'Not applicable', "'Not applicable'", "'Not applicable'", 'sn_atac_seq?', 'snATACseq-multiome', 'atacseq-v2'),
     ]:
         if oligo_probe_panel:
