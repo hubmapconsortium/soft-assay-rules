@@ -5,7 +5,7 @@ from pathlib import Path
 from pprint import pprint
 from collections import defaultdict
 
-ASSAY_TYPES_YAML = 'assay_types.yaml'
+ASSAY_TYPES_YAML = 'src/soft_assay_rules/assay_types.yaml'
 
 INGEST_VALIDATION_TOOLS_PATH = (Path(__file__).parent.parent.parent
                                 / 'submodules' / 'ingest-validation-tools')
@@ -16,7 +16,7 @@ INGEST_VALIDATION_DIR_SCHEMA_PATH = (INGEST_VALIDATION_TOOLS_PATH / 'src' / 'ing
 
 SCHEMA_SPLIT_REGEX = r'(.+)-v(\d)'
 
-CHAIN_OUTPUT_PATH = 'testing_rule_chain.json'
+CHAIN_OUTPUT_PATH = 'src/soft_assay_rules/testing_rule_chain.json'
 
 PREAMBLE = [
     {"type": "note",
@@ -263,6 +263,30 @@ def main() -> None:
             {"type": "match",
              "match": (f"is_dcwg and dataset_type == '{data_type}'"
                        ),
+             "value": ("{"
+                       f"'assaytype': '{assay}',"
+                       " 'vitessce-hints': [],"
+                       f" 'dir-schema': '{schema}',"
+                       f" 'description': '{description}',"
+                       f" 'contains-pii': true,"
+                       f" 'primary': true,"
+                       f" 'dataset-type': '{data_type}',"
+                       f" 'must-contain': [{must_contain_str}]"
+                       "}"
+                       ),
+             "rule_description": f"DCWG {assay}"
+             }
+        )
+
+
+    # GeoMx
+    for data_type, must_contain, assay, description, schema in [
+        ('GeoMx (NGS)', ['RNAseq'], 'geomx_ngs?', 'GeoMx (NGS)', 'geomx-ngs-v2')
+    ]:
+        must_contain_str = ','.join(["'" + elt + "'" for elt in must_contain])
+        json_block.append(
+            {"type": "match",
+             "match": (f"is_dcwg and dataset_type == '{data_type}'"),
              "value": ("{"
                        f"'assaytype': '{assay}',"
                        " 'vitessce-hints': [],"
