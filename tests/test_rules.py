@@ -1,5 +1,6 @@
 from pathlib import Path
 import re
+import json
 
 import pandas as pd
 import pytest
@@ -28,15 +29,23 @@ def test_sample_path():
     'visium_sennet_v2_histology_1rec.tsv',
 #    'visium_sennet_v2_rnaseq_1rec.tsv',
 #    'visium_sennet_v2_visium_1rec.tsv',
+    'codex_cytokit_89e4944336dd47d32a50fe8aac049db1.json',
     ))
 def test_rule_case(test_sample_path, test_data_fname, tmp_path):
     md_path = test_sample_path / test_data_fname
     assert md_path.is_file()
-    arg_df = None
-    assert str(md_path).endswith('.tsv'), f"Arg file {md_path} is of an unrecognized type"
-    arg_df = pd.read_csv(str(md_path), sep='\t')
-    print(arg_df)
-    for idx, row in arg_df.iterrows():
-        payload = {col: row[col] for col in arg_df.columns}
-        rslt = calculate_assay_info(payload)
-        assert rslt, f"{test_data_fname} record {idx} failed"
+    if str(md_path).endswith('.tsv'):
+        arg_df = pd.read_csv(str(md_path), sep='\t')
+        print(arg_df)
+        for idx, row in arg_df.iterrows():
+            payload = {col: row[col] for col in arg_df.columns}
+            rslt = calculate_assay_info(payload)
+            assert rslt, f"{test_data_fname} record {idx} failed"
+    elif str(md_path).endswith('.json'):
+        with open(md_path) as jsonfile:
+            payload = json.load(jsonfile)
+            print(json.dumps(payload))
+            rslt = calculate_assay_info(payload)
+            assert rslt, f"{test_data_fname} record failed"
+    else:
+        assert False, f"Metadata path {md_path} is not .tsv or .json"
