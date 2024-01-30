@@ -10,7 +10,6 @@ import pandas as pd
 from local_rule_tester import print_rslt
 
 AUTH_TOK = 'some_token'
-AUTH_TOK = 'AgbMb5GX7POdjrzE7vvmpxjBVpeoWxgVba5jnvzPbaOrOkM1P8C5CddlYQKKJQrY3P9dM7p9833V23UkGNnNpfz9r0'
 
 TEST_BASE_URL = 'http://localhost:5000/'
 
