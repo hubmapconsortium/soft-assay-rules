@@ -24,13 +24,11 @@ def main() -> None:
             print(f"Skipping directory {argfile}")
             continue
         print(f"Reading {argfile}")
-        arg_df = None
         if argfile.endswith('.tsv'):
             arg_df = pd.read_csv(argfile, sep='\t')
             if len(arg_df.columns) == 1 and 'uuid' in arg_df.columns:
                 for idx, row in arg_df.iterrows():
                     try:
-                        print(f"AUTH_TOK: {AUTH_TOK}")
                         rply = requests.get(
                             TEST_BASE_URL + 'assaytype' + '/metadata/' + row['uuid'],
                             headers={
@@ -83,11 +81,12 @@ def main() -> None:
                 )
                 rply.raise_for_status()
                 rslt = rply.json()
-                print(f"{argfile} {idx} ->")
-                pprint(rslt)
-                if not rslt:
-                    print("Payload follows")
-                    pprint(payload)
+                print_rslt(argfile, None, payload, rslt)
+            except requests.exceptions.HTTPError as excp:
+                print(f"ERROR: {excp}")
+        else:
+            raise RuntimeError(f"Arg file {argfile} is of an"
+                               " unrecognized type")
     print('done')
 
 if __name__ == '__main__':

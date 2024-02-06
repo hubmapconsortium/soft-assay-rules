@@ -50,6 +50,24 @@ def calculate_assay_info(metadata: dict) -> dict:
         return {}
 
 
+def print_rslt(argfile, idx, payload, rslt, show_payload=False):
+    """
+    This just summarizes the results of a test case to stdout
+    """
+    if show_payload:
+        print(f"{argfile} {idx if idx else ''} -> json metadata: {json.dumps(payload)} ->")
+        pprint(rslt)
+        if not rslt:
+            print("NOT MAPPED!")
+    else:
+        print(f"{argfile} {idx if idx else ''} ->")
+        pprint(rslt)
+        if not rslt:
+            print("NOT MAPPED!")
+            print("Payload follows")
+            pprint(payload)
+
+
 def main() -> None:
     for argfile in sys.argv[1:]:
         if argfile.endswith('~'):
@@ -78,18 +96,6 @@ def main() -> None:
         else:
             raise RuntimeError(f"Arg file {argfile} is of an"
                                " unrecognized type")
-        if len(arg_df.columns) == 1 and 'uuid' in arg_df.columns:
-            print('Skipping uuids in {argfile}; not supported in local mode')
-        else:
-            #print(arg_df)
-            for idx, row in arg_df.iterrows():
-                payload = {col: row[col] for col in arg_df.columns}
-                rslt = calculate_assay_info(payload)
-                print(f"{argfile} {idx} ->")
-                pprint(rslt)
-                if not rslt:
-                    print("Payload follows")
-                    pprint(payload)
     print('done')
 
 if __name__ == '__main__':
