@@ -62,6 +62,19 @@ def main() -> None:
         arg_df = None
         if argfile.endswith('.tsv'):
             arg_df = pd.read_csv(argfile, sep='\t')
+            if len(arg_df.columns) == 1 and 'uuid' in arg_df.columns:
+                print(f"Skipping uuids in {argfile}; not supported in local mode")
+            else:
+                #print(arg_df)
+                for idx, row in arg_df.iterrows():
+                    payload = {col: row[col] for col in arg_df.columns}
+                    rslt = calculate_assay_info(payload)
+                    print_rslt(argfile, idx, payload, rslt)
+        elif argfile.endswith('.json'):
+            with open(argfile) as jsonfile:
+                payload = json.load(jsonfile)
+                rslt = calculate_assay_info(payload)
+                print_rslt(argfile, 0, payload, rslt)
         else:
             raise RuntimeError(f"Arg file {argfile} is of an"
                                " unrecognized type")

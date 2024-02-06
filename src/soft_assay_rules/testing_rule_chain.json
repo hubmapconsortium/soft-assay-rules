@@ -397,9 +397,15 @@
     },
     {
         "type": "match",
-        "match": "not_dcwg and is_derived and data_types[0] in ['salmon_sn_rnaseq_10x', 'salmon_rnaseq_10x_sn', 'salmon_rnaseq_10x_v2_sn']",
+        "match": "not_dcwg and is_derived and data_types[0] in ['salmon_sn_rnaseq_10x', 'salmon_rnaseq_10x_sn', 'salmon_rnaseq_10x_v2_sn'] and [elt for elt in dag_provenance_list if elt =~~ 'anndata']",
         "value": "{'assaytype': 'salmon_sn_rnaseq_10x', 'vitessce-hints': ['is_sc', 'rna'], 'primary': false, 'contains-pii': false, 'description': 'snRNA-seq [Salmon]'}",
         "rule_description": "non-DCWG derived salmon_sn_rnaseq_10x"
+    },
+    {
+        "type": "match",
+        "match": "not_dcwg and is_derived and data_types[0] in ['salmon_sn_rnaseq_10x', 'salmon_rnaseq_10x_sn', 'salmon_rnaseq_10x_v2_sn'] and [elt for elt in dag_provenance_list if elt !~~ 'anndata']",
+        "value": "{'assaytype': 'salmon_sn_rnaseq_10x', 'vitessce-hints': ['is_sc', 'rna', 'json_based'], 'primary': false, 'contains-pii': false, 'description': 'snRNA-seq [Salmon]'}",
+        "rule_description": "non-DCWG derived salmon_sn_rnaseq_10x json-based"
     },
     {
         "type": "match",
