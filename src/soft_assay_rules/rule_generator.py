@@ -307,7 +307,7 @@ def main() -> None:
     for data_type, oligo_probe_panel, entity, barcode_read, barcode_size, barcode_offset, umi_read, umi_size, umi_offset, assay, description, schema in [
             ('RNAseq', None, 'single cell', 'Not applicable', 40, "'Not applicable'", 'Not applicable', 8, "'Not applicable'",
              'sciRNAseq', 'sciRNA-seq', 'rnaseq-v2'),
-            ('RNAseq', None, 'single nucleus', 'Read 2', 24, "'10,48,86'", 'Read 2', 10, 0, 'SNARE-RNAseq2', 'snRNAseq (SNARE-seq2)', 'rnaseq-v2'),
+            ('RNAseq', None, 'single nucleus', 'Read 2', "'8,8,8'", "'10,48,86'", 'Read 2', 10, 0, 'SNARE-RNAseq2', 'snRNAseq (SNARE-seq2)', 'rnaseq-v2'),
             ('RNAseq', None, 'spot', 'Read 1', 16, 0, 'Read 1', 12, 16, 'scRNAseq-10Genomics-v3', 'scRNA-seq (10x Genomics v3)', 'rnaseq-v2'),
             ('RNAseq (with probes)', visium_with_probes_str, 'spot', 'Read 1', 16, 0, 'Read 1', 12, 16, 'scRNAseq-visium-with-probes', 'Visium RNAseq with probes', 'rnaseq-with-probes-v2'),
             ('RNAseq', None, 'single cell', 'Read 1', 16, 0, 'Read 1', 10, 16, 'scRNAseq-10xGenomics-v2', 'scRNA-seq (10x Genomics v2)', 'rnaseq-v2'),
