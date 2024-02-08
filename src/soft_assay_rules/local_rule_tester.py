@@ -81,7 +81,7 @@ def main() -> None:
         if argfile.endswith('.tsv'):
             arg_df = pd.read_csv(argfile, sep='\t')
             if len(arg_df.columns) == 1 and 'uuid' in arg_df.columns:
-                print('Skipping uuids in {argfile}; not supported in local mode')
+                print(f"Skipping uuids in {argfile}; not supported in local mode")
             else:
                 #print(arg_df)
                 for idx, row in arg_df.iterrows():

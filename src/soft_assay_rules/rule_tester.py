@@ -4,14 +4,16 @@ import json
 import yaml
 import re
 from os.path import isdir
+from os import environ
 from pprint import pprint
 import pandas as pd
 
 from local_rule_tester import print_rslt
 
-AUTH_TOK = 'some_token'
+AUTH_TOK = environ['AUTH_TOK']
 
-TEST_BASE_URL = 'http://localhost:5000/'
+#TEST_BASE_URL = 'http://localhost:5000/'
+TEST_BASE_URL = 'https://ingest-api.test.hubmapconsortium.org/'
 
 def main() -> None:
     for argfile in sys.argv[1:]:

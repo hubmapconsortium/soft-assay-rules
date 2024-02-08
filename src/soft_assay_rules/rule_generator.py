@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 from pprint import pprint
 from collections import defaultdict
+import argparse
 
 ASSAY_TYPES_YAML = 'assay_types.yaml'
 
@@ -16,7 +17,7 @@ INGEST_VALIDATION_DIR_SCHEMA_PATH = (INGEST_VALIDATION_TOOLS_PATH / 'src' / 'ing
 
 SCHEMA_SPLIT_REGEX = r'(.+)-v(\d)'
 
-CHAIN_OUTPUT_PATH = 'testing_rule_chain.json'
+CHAIN_OUTPUT_PATH = '/tmp/testing_rule_chain.json'
 
 PREAMBLE = [
     {"type": "note",
@@ -464,4 +465,18 @@ def main() -> None:
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description="Generate a complete new rule chain")
+    parser.add_argument("--force", action="store_true",
+                        help=("Mods to the rule chain are now made by directly editing"
+                              " the testing_rule_chain.json file.  If you want to"
+                              " recreate that file from scratch, run this program"
+                              " with the '--force' option.  The newly created chain"
+                              f" will be written to {CHAIN_OUTPUT_PATH} , and you"
+                              " will need to recreate any edits that have been added"
+                              " to the current rule chain file."))
+    args = parser.parse_args()
+    if args.force:
+        main()
+    else:
+        parser.print_help()
+
