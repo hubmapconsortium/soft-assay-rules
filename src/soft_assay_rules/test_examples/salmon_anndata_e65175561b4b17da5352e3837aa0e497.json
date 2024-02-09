@@ -1,0 +1,1 @@
+{"dag_provenance_list": ["https://github.com/hubmapconsortium/salmon-rnaseq:pipeline.cwl", "https://github.com/hubmapconsortium/portal-containers:anndata-to-ui.cwl"], "data_types": ["salmon_sn_rnaseq_10x"], "entity_type": "Dataset"}
