@@ -279,6 +279,30 @@ def main() -> None:
              }
         )
 
+
+    # GeoMx
+    for data_type, must_contain, assay, description, schema in [
+        ('GeoMx (NGS)', ['RNAseq'], 'geomx_ngs?', 'GeoMx (NGS)', 'geomx-ngs-v2')
+    ]:
+        must_contain_str = ','.join(["'" + elt + "'" for elt in must_contain])
+        json_block.append(
+            {"type": "match",
+             "match": (f"is_dcwg and dataset_type == '{data_type}'"),
+             "value": ("{"
+                       f"'assaytype': '{assay}',"
+                       " 'vitessce-hints': [],"
+                       f" 'dir-schema': '{schema}',"
+                       f" 'description': '{description}',"
+                       f" 'contains-pii': true,"
+                       f" 'primary': true,"
+                       f" 'dataset-type': '{data_type}',"
+                       f" 'must-contain': [{must_contain_str}]"
+                       "}"
+                       ),
+             "rule_description": f"DCWG {assay}"
+             }
+        )
+
     # Multiome
     for data_type, must_contain, assay, description, schema in [
             ('10X Multiome', ['RNAseq', 'ATACseq'], '10x-multiome', '10X Multiome', '10x-multiome-v2'),
