@@ -22,7 +22,7 @@ from rule_chain import (
     RuleLogicException,
 )
 
-from rule_generator import CHAIN_OUTPUT_PATH as CHAIN_INPUT_PATH
+CHAIN_INPUT_PATH = Path(__file__).parent / "testing_rule_chain.json"
 
 rule_chain = None
 
