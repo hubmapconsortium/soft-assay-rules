@@ -272,7 +272,8 @@ def main() -> None:
                        f" 'contains-pii': true,"
                        f" 'primary': true,"
                        f" 'dataset-type': '{data_type}',"
-                       f" 'must-contain': [{must_contain_str}]"
+                       f" 'must-contain': [{must_contain_str}],"
+                       f" 'is-multi-assay': true"
                        "}"
                        ),
              "rule_description": f"DCWG {assay}"
@@ -296,7 +297,8 @@ def main() -> None:
                        f" 'contains-pii': true,"
                        f" 'primary': true,"
                        f" 'dataset-type': '{data_type}',"
-                       f" 'must-contain': [{must_contain_str}]"
+                       f" 'must-contain': [{must_contain_str}],"
+                       f" 'is-multi-assay': true"
                        "}"
                        ),
              "rule_description": f"DCWG {assay}"
@@ -320,7 +322,8 @@ def main() -> None:
                        f" 'contains-pii': true,"
                        f" 'primary': true,"
                        f" 'dataset-type': '{data_type}',"
-                       f" 'must-contain': [{must_contain_str}]"
+                       f" 'must-contain': [{must_contain_str}],"
+                       f" 'is-multi-assay': true"
                        "}"
                        ),
              "rule_description": f"DCWG {assay}"
