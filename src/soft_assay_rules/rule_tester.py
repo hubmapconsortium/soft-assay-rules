@@ -13,7 +13,8 @@ from local_rule_tester import print_rslt
 AUTH_TOK = environ['AUTH_TOK']
 
 #TEST_BASE_URL = 'http://localhost:5000/'
-TEST_BASE_URL = 'https://ingest-api.test.hubmapconsortium.org/'
+#TEST_BASE_URL = 'https://ingest-api.test.hubmapconsortium.org/'
+TEST_BASE_URL = 'https://ingest-api.dev.hubmapconsortium.org/'
 
 def main() -> None:
     for argfile in sys.argv[1:]:
