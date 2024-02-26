@@ -47,7 +47,13 @@ def test_sample_path():
       'primary': False,
       'vitessce-hints': ('codex', 'is_image', 'is_tiled', 'json_based')}),
     
-    ))
+    ("codex_cytokit_anndata_43213991a54ce196d406707ffe2e86bd.json",
+     {'assaytype': 'codex_cytokit_v1',
+      'contains-pii': False,
+      'description': 'CODEX [Cytokit + SPRM]',
+      'primary': False,
+      'vitessce-hints': ('codex', 'is_image', 'is_tiled', 'anndata')}),
+))
 def test_rule_match_case(test_sample_path, test_data_fname, expected, tmp_path):
     md_path = test_sample_path / test_data_fname
     print(f"MD_PATH: {md_path}")
