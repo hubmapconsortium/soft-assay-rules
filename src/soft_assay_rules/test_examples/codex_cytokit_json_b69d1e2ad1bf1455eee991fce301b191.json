@@ -1,1 +1,1 @@
-{"dag_provenance_list": ["https://github.com/hubmapconsortium/codex-pipeline.git:pipeline.cwl", "https://github.com/hubmapconsortium/portal-containers.git:sprm-to-json.cwl"], "data_types": ["codex_cytokit_v1"], "entity_type": "Dataset"}
+{"dag_provenance_list": ["https://github.com/hubmapconsortium/codex-pipeline.git:pipeline.cwl", "https://github.com/hubmapconsortium/portal-containers.git:sprm-to-json.cwl"], "data_types": ["codex_cytokit_v1"], "entity_type": "Dataset", "creation_action":  "Central Process"}
