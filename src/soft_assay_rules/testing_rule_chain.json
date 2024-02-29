@@ -25,7 +25,7 @@
     },
     {
         "type": "note",
-        "match": "creation_action == 'Create Publication Activity' or dataset_type == 'Publication'",
+        "match": "creation_action == 'Create Publication Activity' or dataset_type == 'Publication' or assay_type == 'Publication'",
         "value": "{'is_publication': true}",
         "rule_description": "Preamble rule identifying publications"
     },
@@ -271,9 +271,9 @@
     },
     {
         "type": "match",
-        "match": "not_dcwg and is_publication and data_types[0] in ['publication']",
+        "match": "is_publication and data_types[0] in ['publication']",
         "value": "{'assaytype': 'publication', 'vitessce-hints': [], 'primary': false, 'contains-pii': false, 'description': 'Publication Data'}",
-        "rule_description": "non-DCWG derived publication"
+        "rule_description": "derived publication"
     },
     {
         "type": "match",
@@ -739,7 +739,7 @@
     },
     {
         "type": "match",
-        "match": "is_dcwg and is_central_processed and data_types[0] in ['visium_no_probes']",
+        "match": "is_central_processed and data_types[0] in ['visium_no_probes']",
         "value": "{'assaytype': 'visium-no-probes', 'vitessce-hints': ['rna', 'is_image', 'anndata', 'spatial'], 'primary': false, 'contains-pii': false, 'description': 'Visium (no probes) [Salmon + Scanpy]', 'is-multi-assay': true}",
         "rule_description": "non-DCWG derived visium-no-probes"
     }
