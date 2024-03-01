@@ -25,7 +25,7 @@
     },
     {
         "type": "note",
-        "match": "creation_action == 'Create Publication Activity' or dataset_type == 'Publication' or assay_type == 'Publication'",
+        "match": "creation_action == 'Create Publication Activity' or dataset_type == 'Publication' or assay_type == 'publication'",
         "value": "{'is_publication': true}",
         "rule_description": "Preamble rule identifying publications"
     },
@@ -271,7 +271,7 @@
     },
     {
         "type": "match",
-        "match": "is_publication and data_types[0] in ['publication']",
+        "match": "is_publication",
         "value": "{'assaytype': 'publication', 'vitessce-hints': [], 'primary': false, 'contains-pii': false, 'description': 'Publication Data'}",
         "rule_description": "derived publication"
     },
