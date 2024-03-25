@@ -374,7 +374,7 @@
     {
         "type": "match",
         "match": "not_dcwg and is_primary and assay_type in ['seqFish', 'seqFISH']",
-        "value": "{'assaytype': 'seqFish', 'dir-schema': 'seqfish-v0', 'tbl-schema': 'seqfish-v'+version.to_str, 'vitessce-hints': [], 'contains-pii': false, 'primary': true, 'description': 'seqFISH', 'dataset-type': 'seqFish' }",
+        "value": "{'assaytype': 'seqFish', 'dir-schema': 'seqfish-v0', 'tbl-schema': 'seqfish-v'+version.to_str, 'vitessce-hints': [], 'contains-pii': false, 'primary': true, 'description': 'seqFISH', 'dataset-type': 'seqFISH' }",
         "rule_description": "non-DCWG primary seqFish"
     },
     {
