@@ -80,13 +80,13 @@
     {
         "type": "match",
         "match": "not_dcwg and is_primary and assay_type in ['CODEX']",
-        "value": "{'assaytype': 'CODEX', 'dir-schema': 'codex-v1-with-dataset-json', 'tbl-schema': 'codex-v'+version.to_str, 'vitessce-hints': [], 'contains-pii': false, 'primary': true, 'description': 'CODEX', 'dataset-type': 'CODEX' }",
+        "value": "{'assaytype': 'CODEX', 'dir-schema': 'codex-v1', 'tbl-schema': 'codex-v'+version.to_str, 'vitessce-hints': [], 'contains-pii': false, 'primary': true, 'description': 'CODEX', 'dataset-type': 'CODEX' }",
         "rule_description": "non-DCWG primary CODEX"
     },
     {
         "type": "match",
         "match": "not_dcwg and is_primary and assay_type in ['CODEX2']",
-        "value": "{'assaytype': 'CODEX2', 'dir-schema': 'codex-v1-with-dataset-json', 'tbl-schema': 'codex-v'+version.to_str, 'vitessce-hints': [], 'contains-pii': false, 'primary': true, 'description': 'CODEX (CODEX2 assay type)', 'dataset-type': 'CODEX' }",
+        "value": "{'assaytype': 'CODEX2', 'dir-schema': 'codex-v1', 'tbl-schema': 'codex-v'+version.to_str, 'vitessce-hints': [], 'contains-pii': false, 'primary': true, 'description': 'CODEX (CODEX2 assay type)', 'dataset-type': 'CODEX' }",
         "rule_description": "non-DCWG primary CODEX2"
     },
     {
