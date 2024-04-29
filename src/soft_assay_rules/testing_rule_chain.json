@@ -524,7 +524,7 @@
     {
         "type": "match",
         "match": "is_dcwg and is_primary and dataset_type == 'SNARE-seq2'",
-        "value": "{'assaytype': 'multiome-snare-seq2', 'vitessce-hints': [], 'dir-schema': 'snareseq2-v2', 'description': 'SNARE-seq2', 'contains-pii': true, 'primary': true, 'dataset-type': 'SNARE-seq2', 'must-contain': ['RNAseq','ATACseq'], 'is-multi-assay': true}",
+        "value": "{'assaytype': 'multiome-snare-seq2', 'vitessce-hints': [], 'dir-schema': 'snareseq2-v2', 'description': 'SNAREseq2', 'contains-pii': true, 'primary': true, 'dataset-type': 'SNARE-seq2', 'must-contain': ['RNAseq','ATACseq'], 'is-multi-assay': true}",
         "rule_description": "DCWG multiome-snare-seq2"
     },
     {
@@ -746,7 +746,7 @@
     {
         "type": "match",
         "match": "is_central_processed and data_types[0] in ['multiome_snareseq']",
-        "value": "{'assaytype': 'multiome-snare-seq2', 'vitessce-hints': ['rna', 'is_image', 'anndata', 'spatial'], 'primary': false, 'contains-pii': false, 'description': 'SNARE-seq2 [Salmon + ArchR + Muon]', 'is-multi-assay': true}",
+        "value": "{'assaytype': 'multiome-snare-seq2', 'vitessce-hints': ['rna', 'is_image', 'anndata', 'spatial'], 'primary': false, 'contains-pii': false, 'description': 'SNAREseq2 [Salmon + ArchR + Muon]', 'is-multi-assay': true}",
         "rule_description": "derived multiome snare-seq2"
     },
     {
