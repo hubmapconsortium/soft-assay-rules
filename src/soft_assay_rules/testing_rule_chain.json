@@ -434,7 +434,7 @@
     {
         "type": "match",
         "match": "not_dcwg and is_primary and assay_type in ['Slide-seq']",
-        "value": "{'assaytype': 'Slide-seq', 'dir-schema': 'slideseq-v0', 'tbl-schema': 'slideseq-v'+version.to_str, 'vitessce-hints': [], 'contains-pii': true, 'primary': true, 'description': 'Slide-seq', 'dataset-type': 'Slideseq' }",
+        "value": "{'assaytype': 'Slide-seq', 'dir-schema': 'slideseq-v0', 'tbl-schema': 'slideseq-v'+version.to_str, 'vitessce-hints': [], 'contains-pii': true, 'primary': true, 'description': 'Slideseq', 'dataset-type': 'Slideseq' }",
         "rule_description": "non-DCWG primary Slide-seq"
     },
     {
