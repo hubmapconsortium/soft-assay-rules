@@ -53,6 +53,20 @@ def test_sample_path():
       'description': 'CODEX [Cytokit + SPRM]',
       'primary': False,
       'vitessce-hints': ('codex', 'is_image', 'is_tiled', 'anndata')}),
+
+    ("salmon_json_e8d642084fc5ec8b5d348ebab96a4b22.json",
+     {'assaytype': 'salmon_rnaseq_10x',
+      'contains-pii': False,
+      'description': 'scRNA-seq (10x Genomics) [Salmon]',
+      'primary': False,
+      'vitessce-hints': ('is_sc', 'rna', 'json_based')}),
+
+    ("salmon_anndata_6efe308f2e7360127e47865edf075424.json",
+     {'assaytype': 'salmon_rnaseq_10x',
+      'contains-pii': False,
+      'description': 'scRNA-seq (10x Genomics) [Salmon]',
+      'primary': False,
+      'vitessce-hints': ('is_sc', 'rna')})
 ))
 def test_rule_match_case(test_sample_path, test_data_fname, expected, tmp_path):
     md_path = test_sample_path / test_data_fname
