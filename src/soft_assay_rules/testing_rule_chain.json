@@ -44,19 +44,19 @@
     {
         "type": "match",
         "match": "not_dcwg and is_primary and assay_type in ['AF']",
-        "value": "{'ubkg_code': 'C200001', 'ubkg_code': '', 'assaytype': 'AF', 'dir-schema': 'af-v0', 'tbl-schema': 'af-v'+version.to_str, 'vitessce-hints': [], 'contains-pii': false, 'primary': true, 'description': 'Auto-fluorescence Microscopy', 'dataset-type': 'Auto-fluorescence' }",
+        "value": "{'ubkg_code': 'C200001', 'assaytype': 'AF', 'dir-schema': 'af-v0', 'tbl-schema': 'af-v'+version.to_str, 'vitessce-hints': [], 'contains-pii': false, 'primary': true, 'description': 'Auto-fluorescence Microscopy', 'dataset-type': 'Auto-fluorescence' }",
         "rule_description": "non-DCWG primary AF"
     },
     {
         "type": "match",
         "match": "is_central_processed and data_types[0] in ['AF_pyramid']",
-        "value": "{'ubkg_code': 'C200010', 'ubkg_code': '', 'assaytype': 'AF_pyramid', 'vitessce-hints': ['pyramid', 'is_support'], 'primary': false, 'contains-pii': false, 'description': 'Auto-fluorescence Microscopy [Image Pyramid]', 'pipeline-shorthand': 'Image Pyramid'}",
+        "value": "{'ubkg_code': 'C200010', 'assaytype': 'AF_pyramid', 'vitessce-hints': ['pyramid', 'is_support'], 'primary': false, 'contains-pii': false, 'description': 'Auto-fluorescence Microscopy [Image Pyramid]', 'pipeline-shorthand': 'Image Pyramid'}",
         "rule_description": "derived AF_pyramid"
     },
     {
         "type": "match",
         "match": "not_dcwg and is_primary and assay_type in ['ATACseq-bulk', 'bulkATACseq']",
-        "value": "{'ubkg_code': 'C200020', 'ubkg_code': '', 'assaytype': 'ATACseq-bulk', 'dir-schema': 'bulkatacseq-v0', 'tbl-schema': 'bulkatacseq-v'+version.to_str, 'vitessce-hints': [], 'contains-pii': true, 'primary': true, 'description': 'Bulk ATACseq', 'dataset-type': 'ATACseq' }",
+        "value": "{'ubkg_code': 'C200020', 'assaytype': 'ATACseq-bulk', 'dir-schema': 'bulkatacseq-v0', 'tbl-schema': 'bulkatacseq-v'+version.to_str, 'vitessce-hints': [], 'contains-pii': true, 'primary': true, 'description': 'Bulk ATACseq', 'dataset-type': 'ATACseq' }",
         "rule_description": "non-DCWG primary ATACseq-bulk"
     },
     {
