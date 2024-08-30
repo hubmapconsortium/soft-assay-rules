@@ -24,6 +24,25 @@ data.  This repo contains the development history of the rule chain, plus tools 
 and test the rule chain.  When a new version of the rule chain is ready it is exported to
 another repo to actually be installed in the rule engine.
 
+Once installed, the rule chain can be triggered in response to a POST request containing
+a metadata.tsv record in JSON form, or in response to a GET request including a uuid or
+HuBMAP/SenNet ID.  In the the former case the rule chain is passed only the given JSON
+with an added pair with with key "sample_is_human" and a boolean value.  This POST
+mechanism is used when validating and ingesting new external data.
+
+When called with a GET request and uuid or ID, the entity JSON block for the given
+entity is fetched and several values are produced from that metadata if possible,
+including:
+* the entity type, typically 'Dataset' or 'Publication'
+* information from the dag provenance list if present
+* data_types information
+* the entity creation action
+* sample_is_human, as inferred from the entity provenance
+
+The description of the original data format provided to the rule chain includes:
+* If the original data includes a metadata.tsv record, the contents of that record.
+* 
+
 ## Running Unit Tests
 
 Assuming the python environment specified in `requirements.txt` is in place, unit tests can be
