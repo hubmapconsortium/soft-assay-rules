@@ -33,15 +33,15 @@ mechanism is used when validating and ingesting new external data.
 When called with a GET request and uuid or ID, the entity JSON block for the given
 entity is fetched and several values are produced from that metadata if possible,
 including:
+* the ingest metadata, if present
 * the entity type, typically 'Dataset' or 'Publication'
-* information from the dag provenance list if present
+* information from the dag provenance list, or an empty list if it is unavailable
 * data_types information
 * the entity creation action
 * sample_is_human, as inferred from the entity provenance
 
-The description of the original data format provided to the rule chain includes:
-* If the original data includes a metadata.tsv record, the contents of that record.
-* 
+These values are used to construct a JSON block which is passed to the rule chain.
+
 
 ## Running Unit Tests
 
@@ -54,18 +54,39 @@ bash ./test.sh
 ## Running Other Test Routines
 
 The `src/soft_assay_rules` directory contains two test routines, `rule_tester.py` and `local_rule_tester.py` .
-Both use the samples in the `test_examples` subdirectory.
-The first of these accesses a (hard-coded) ingest-api URL to run tests against a remote running rule engine,
-and thus requires a live token.  The token is provided through the environment variable AUTH_TOK .  For example,
+Both use the samples in the `test_examples` subdirectory.  local_rule_tester.py uses cached values previously
+fetched from the appropriate services (see the section on cached REST endpoint responses below).
+The first of these accesses an ingest-api URL to run tests against a remote running rule engine,
+and thus requires a live token.  The token is provided through the environment variable AUTH_TOK .  Since
+opertions in the context of SENNET differ slightly from those in the HUBMAP context, that context must
+also be provided.  For example,
 ```
-env AUTH_TOK=<some token> python rule_tester.py test_examples/*
+env AUTH_TOK=<some token> APP_CTX=<HUBMAP or SENNET> python rule_tester.py test_examples/*
 ```
-tests the remote rule engine against all the samples in the `test_examples` directory.
+tests the remote rule engine against all the samples in the `test_examples` directory.  If the SENNET
+context is specified, examples taken from the HuBMAP side will fail, and vice versa.
 
-In contrast,`local_rule_tester.py` instantiates a local rule engine and installs the rules found in the
-current `testing_rule_chain.json` file.  It can be used to test new rules, but because it cannot actually
-look up datasets via entity-api it must ignore test cases for which only a uuid is given.  It is invoked
-as:
+`local_rule_tester.py` instantiates a local rule engine and installs the rules found in the
+current `testing_rule_chain.json` file.  It can be used to test new rules.  Because it cannot query
+entity-api when a uuid is specified, it must use cached results from the necessary queries.  (See
+the section on cached REST endpoint responses below).  This test routine is invokes
+as follows:
 ```
 $ python ./local_rule_tester.py test_examples.*
 ```
+## Cached REST Endpoint Responses
+
+The utility routine `cache_responses.py` can be used to prefetch and save the entity-api metadata JSON
+blocks associated with a given uuid or HuBMAP/SenNet ID.  It is called as follows:
+```
+env AUTH_TOK=<some token> APP_CTX=<HUBMAP or SENNET> python cache_responses.py uuid1 [uuid2 [uuid3...]]
+```
+This causes the entity-api JSON content for the uuid and the ingest-api/assayclassifier/metadata JSON
+content to be fetched and stored locally.  (If the value of "sample_is_human" is not present in the
+ingest-api/assayclassifier/metadata JSON fetched from the endpoint, it is inferred from the entity-api
+data and added before the JSON is cached).  The JSON returned by the deployed version of the rule chain
+is printed, for convenience in setting up new unit tests.  Thus a new unit test corresponding to a
+specific uuid in a specific APP_CTX can be set up by:
+* prefetching and saving the appropriate JSON using `cache_responses.py`
+* creating a new test case using that uuid, or the ingest metadata for that uuid
+* saving the expected JSON output of the rule chain as the desired test output
