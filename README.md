@@ -72,7 +72,7 @@ entity-api when a uuid is specified, it must use cached results from the necessa
 the section on cached REST endpoint responses below).  This test routine is invokes
 as follows:
 ```
-$ python ./local_rule_tester.py test_examples.*
+$ python ./local_rule_tester.py test_examples/*
 ```
 ## Cached REST Endpoint Responses
 
