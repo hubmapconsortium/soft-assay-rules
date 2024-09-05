@@ -13,7 +13,7 @@ from hubmap_commons.exceptions import HTTPException
 from werkzeug.exceptions import HTTPException as WerkzeugException
 
 from source_is_human import source_is_human
-from local_rule_tester import print_rslt
+from test_utils import print_rslt
 
 AUTH_TOK = environ['AUTH_TOK']
 APP_CTX = environ['APP_CTX']
@@ -21,7 +21,7 @@ from cache_responses import (
     build_cached_json_fname,
     get_entity_json,
     get_metadata_json,
-    ASSAYTYPE_URL
+    get_urls
 )
 
 logging.basicConfig(encoding="utf-8", level=logging.INFO)
@@ -47,8 +47,9 @@ def main() -> None:
                         LOGGER.info(f"source_is_human {[uuid]} returns {is_human}")
                         payload = get_metadata_json(uuid)
                         payload["source_is_human"] = is_human
+                        assaytype_url = get_urls()[0]
                         rply = requests.get(
-                            ASSAYTYPE_URL + 'assaytype' + '/' + uuid,
+                            assaytype_url + 'assaytype' + '/' + uuid,
                             headers={
                                 'Authorization': 'Bearer ' + AUTH_TOK,
                                 'content-type': 'application/json'
@@ -73,8 +74,9 @@ def main() -> None:
                         else:
                             is_human = True  # legacy data is all human
                         payload["source_is_human"] = is_human
+                        assaytype_url = get_urls()[0]
                         rply = requests.post(
-                            ASSAYTYPE_URL + 'assaytype',
+                            assaytype_url + 'assaytype',
                             data=json.dumps(payload),
                             headers={
                                 'Authorization': 'Bearer ' + AUTH_TOK,
@@ -92,8 +94,9 @@ def main() -> None:
                     payload = json.load(jsonfile)
                 assert "source_is_human" in payload, ("cached payload {argfile} lacks"
                                                       f" source_is_human")
+                assaytype_url = get_urls()[0]
                 rply = requests.post(
-                    ASSAYTYPE_URL + 'assaytype',
+                    assaytype_url + 'assaytype',
                     data=json.dumps(payload),
                     headers={
                         'Authorization': 'Bearer ' + AUTH_TOK,

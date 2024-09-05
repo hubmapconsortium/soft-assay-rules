@@ -15,24 +15,33 @@ from werkzeug.exceptions import HTTPException as WerkzeugException
 
 from source_is_human import source_is_human
 
-from local_rule_tester import print_rslt
+from test_utils import print_rslt
 
 logging.basicConfig(encoding="utf-8", level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
 
-AUTH_TOK = environ['AUTH_TOK']
-APP_CTX = environ['APP_CTX']
+AUTH_TOK = environ.get("AUTH_TOK")
+APP_CTX = environ.get("APP_CTX")
 
-if APP_CTX == "HUBMAP":
-    #ASSAYTYPE_URL = 'https://ingest-api.test.hubmapconsortium.org/'
-    #ASSAYTYPE_URL = 'https://ingest.api.hubmapconsortium.org/'
-    ASSAYTYPE_URL = 'https://ingest-api.dev.hubmapconsortium.org/'
-    ENTITY_URL = 'https://entity.api.hubmapconsortium.org/'
-elif APP_CTX == "SENNET":
-    ASSAYTYPE_URL = 'https://ingest.api.sennetconsortium.org/'
-    ENTITY_URL = 'https://entity.api.sennetconsortium.org/'
-else:
-    raise RuntimeError(f"Unknown APP_CTX {APP_CTX}")
+def get_urls():
+    """
+    Returns assaytype_url, entity_url as a tuple
+    """
+    if APP_CTX == "HUBMAP":
+        #assaytype_url = 'https://ingest-api.test.hubmapconsortium.org/'
+        #assaytype_url = 'https://ingest.api.hubmapconsortium.org/'
+        assaytype_url = 'https://ingest-api.dev.hubmapconsortium.org/'
+        entity_url = 'https://entity.api.hubmapconsortium.org/'
+        return assaytype_url, entity_url
+    elif APP_CTX == "SENNET":
+        assaytype_url = 'https://ingest.api.sennetconsortium.org/'
+        entity_url = 'https://entity.api.sennetconsortium.org/'
+        return assaytype_url, entity_url
+    else:
+        if APP_CTX:
+            raise RuntimeError(f"Unknown APP_CTX {APP_CTX}")
+        else:
+            raise RuntimeError("Environment does not contain APP_CTX")
 
 
 def build_cached_json_fname(uuid, app_ctx,
@@ -72,7 +81,9 @@ def get_entity_json(ds_uuid: str) -> dict:
     entity.  This works for sources and samples as well as
     for datasets.
     """
-    response = requests.get(ENTITY_URL + 'entities/' + ds_uuid,
+    assert AUTH_TOK, "AUTH_TOK was not found in the environment"
+    entity_url = get_urls()[1]
+    response = requests.get(entity_url + 'entities/' + ds_uuid,
                             headers={"Authorization":f"Bearer {AUTH_TOK}"}
                             )
     response.raise_for_status()
@@ -85,8 +96,10 @@ def get_metadata_json(ds_uuid:str) -> dict:
     Given a uuid and the (implicit) request, return the
     metadata passed to the rule chain.
     """
+    assert AUTH_TOK, "AUTH_TOK was not found in the environment"
+    assaytype_url = get_urls()[0]
     rply = requests.get(
-        ASSAYTYPE_URL + 'assaytype' + '/metadata/' + ds_uuid,
+        assaytype_url + 'assaytype' + '/metadata/' + ds_uuid,
         headers={
             'Authorization': 'Bearer ' + AUTH_TOK,
             'content-type': 'application/json'
@@ -102,8 +115,10 @@ def get_rulechain_json(ds_uuid:str) -> dict:
     Given a uuid and the (implicit) request, return the
     the output of the rule chain implementation on the endpoint.
     """
+    assert AUTH_TOK, "AUTH_TOK was not found in the environment"
+    assaytype_url = get_urls()[0]
     rply = requests.get(
-        ASSAYTYPE_URL + 'assaytype/' + ds_uuid,
+        assaytype_url + 'assaytype/' + ds_uuid,
         headers={
             'Authorization': 'Bearer ' + AUTH_TOK,
             'content-type': 'application/json'
