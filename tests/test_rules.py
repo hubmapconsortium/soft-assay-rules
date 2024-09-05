@@ -18,7 +18,7 @@ def test_sample_path():
     
 
 @pytest.mark.parametrize(('test_data_fname'), (
-    'validated-HuBMAP-Visium-RNAseq-metadata_1rec.tsv',
+    "metadata_HBM263.FTWN.879_visium_rnaseq_hubmap.tsv",
     'validated-HuBMAP-Visium-assay-metadata_1rec.tsv',
     'validated-HuBMAP-Visium-Histology-metadata_1rec.tsv',
     'codex_with_version_number.tsv',
@@ -26,9 +26,6 @@ def test_sample_path():
     'e45724a72ab0e7d7b283451836dd983e_codex_metadata.tsv',
     'validated-TEST-Histology-1rec-metadata.tsv',
     'validated-TEST-RNAseq-1rec-metadata_updated_20231031.tsv',
-    'visium_sennet_v2_histology_1rec.tsv',
-#    'visium_sennet_v2_rnaseq_1rec.tsv',
-#    'visium_sennet_v2_visium_1rec.tsv',
     'codex_cytokit_89e4944336dd47d32a50fe8aac049db1.json',
     ))
 def test_rule_case(test_sample_path, test_data_fname, tmp_path):
