@@ -43,13 +43,17 @@ including:
 These values are used to construct a JSON block which is passed to the rule chain.
 
 
-## Running Unit Tests
+## Unit Tests
 
 Assuming the python environment specified in `requirements.txt` is in place, unit tests can be
 run from the top level directory test.sh script:
 ```
 bash ./test.sh
 ```
+
+The rule chain is tested, using examples stored in src/soft_assay_rules/test_examples and making
+use of cached entity-api output where necessary (see below).  The function source_is_human() is also
+tested against cached entity-api output.
 
 ## Running Other Test Routines
 
@@ -72,7 +76,7 @@ entity-api when a uuid is specified, it must use cached results from the necessa
 the section on cached REST endpoint responses below).  This test routine is invokes
 as follows:
 ```
-$ python ./local_rule_tester.py test_examples.*
+$ python ./local_rule_tester.py test_examples/*
 ```
 ## Cached REST Endpoint Responses
 
