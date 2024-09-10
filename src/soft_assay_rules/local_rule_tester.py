@@ -127,7 +127,7 @@ def main() -> None:
                     is_human = source_is_human([uuid], wrapped_lookup_json)
                     LOGGER.info(f"source_is_human for [{uuid}] returns {is_human}")
                     payload = wrapped_lookup_metadata_json(uuid)
-                    LOGGER.info(f"PAYLOAD: \n" + pformat(payload))
+                    LOGGER.debug(f"PAYLOAD: \n" + pformat(payload))
                     rslt = calculate_assay_info(payload)
                     print_rslt(argfile, idx, payload, rslt)
             else:
@@ -152,7 +152,7 @@ def main() -> None:
                 # This reloaded payload was captured from a valid assayclassifier
                 # version, so the payload should be complete- no added elements
                 # needed.
-                LOGGER.info(f"RELOADED PAYLOAD: \n" + pformat(payload))
+                LOGGER.debug(f"RELOADED PAYLOAD: \n" + pformat(payload))
                 rslt = calculate_assay_info(payload)
                 print_rslt(argfile, 0, payload, rslt)
         else:
