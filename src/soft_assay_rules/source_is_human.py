@@ -3,16 +3,15 @@ import logging
 LOGGER = logging.getLogger(__name__)
 
 def merge_sources(source_type, this_source_type):
+    initial_source_type = source_type  # for diagnostics
     if source_type is None:
         source_type = this_source_type
     elif source_type == this_source_type:
         pass
     else:
         if this_source_type.upper() == "HUMAN":
-            LOGGER.debug(f"{source_type} + {this_source_type} -> {source_type} (HUMAN)")
-            return True
-        source_type = "MIXED"
-    LOGGER.debug(f"{source_type} + {this_source_type} -> {source_type}")
+            source_type = "HUMAN"
+    LOGGER.debug(f"merge_sources {initial_source_type} + {this_source_type} -> {source_type}")
     return source_type
 
 
