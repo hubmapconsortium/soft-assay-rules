@@ -100,7 +100,7 @@ def test_sample_path():
       'contains-pii': True,
       'dataset-type': 'Visium (no probes)',
       'description': 'Visium (no probes)',
-      'dir-schema': 'visium-no-probes-v2',
+      'dir-schema': 'visium-no-probes-v3',
       'is-multi-assay': True,
       'must-contain': ('Histology', 'RNAseq'),
       'primary': True,
