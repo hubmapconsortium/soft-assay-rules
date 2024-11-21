@@ -26,6 +26,7 @@ def test_sample_path():
       "description": "snRNAseq [Salmon]",
       "primary": False,
       "vitessce-hints": ("is_sc", "rna", "json_based"),
+      'ubkg_code': 'C202000',
       'pipeline-shorthand': 'Salmon'}),
 
     ("salmon_anndata_e65175561b4b17da5352e3837aa0e497.json",
@@ -34,6 +35,7 @@ def test_sample_path():
       'description': 'snRNAseq [Salmon]',
       'primary': False,
       'vitessce-hints': ('is_sc', 'rna'),
+      'ubkg_code': 'C200630',
       'pipeline-shorthand': 'Salmon'}),
 
     ("codex_cytokit_89e4944336dd47d32a50fe8aac049db1.json",
@@ -42,6 +44,7 @@ def test_sample_path():
       'description': 'CODEX [Cytokit + SPRM]',
       'primary': False,
       'vitessce-hints': ('sprm', 'anndata', 'is_image', 'is_tiled'),
+      'ubkg_code': 'C200100',
       'pipeline-shorthand': 'Cytokit + SPRM'}),
 
     ("codex_cytokit_json_b69d1e2ad1bf1455eee991fce301b191.json",
@@ -50,6 +53,7 @@ def test_sample_path():
       'description': 'CODEX [Cytokit + SPRM]',
       'primary': False,
       'vitessce-hints': ('codex', 'is_image', 'is_tiled', 'json_based'),
+      'ubkg_code': 'C200090',
       'pipeline-shorthand': 'Cytokit + SPRM'}),
     
     ("codex_cytokit_anndata_43213991a54ce196d406707ffe2e86bd.json",
@@ -58,7 +62,8 @@ def test_sample_path():
       'description': 'CODEX [Cytokit + SPRM]',
       'primary': False,
       'vitessce-hints': ('codex', 'is_image', 'is_tiled', 'anndata'),
-      'pipeline-shorthand': 'Cytokit + SPRM'}
+      'ubkg_code': 'C200080',
+      'pipeline-shorthand': 'Cytokit + SPRM'},
      ),
 
     ("salmon_json_e8d642084fc5ec8b5d348ebab96a4b22.json",
@@ -67,6 +72,7 @@ def test_sample_path():
       'description': 'scRNAseq (10x Genomics) [Salmon]',
       'primary': False,
       'vitessce-hints': ('is_sc', 'rna', 'json_based'),
+      'ubkg_code': 'C202010',
       'pipeline-shorthand': 'Salmon'}),
 
     ("salmon_anndata_6efe308f2e7360127e47865edf075424.json",
@@ -75,6 +81,7 @@ def test_sample_path():
       'description': 'scRNAseq (10x Genomics) [Salmon]',
       'primary': False,
       'vitessce-hints': ('is_sc', 'rna'),
+      'ubkg_code': 'C200500',
       'pipeline-shorthand': 'Salmon'}),
 
     ("metadata_SNT594.FZCM.747_SENNET.json",
@@ -84,6 +91,7 @@ def test_sample_path():
       'description': 'scRNAseq (10x Genomics v3)',
       'dir-schema': 'rnaseq-v2',
       'primary': True,
+      'ubkg_code': 'C200850',
       'vitessce-hints': ()}),
 
     ("metadata_HBM263.FTWN.879_visium_rnaseq_hubmap.tsv",
@@ -93,6 +101,7 @@ def test_sample_path():
       'description': 'Capture bead RNAseq (10x Genomics v3)',
       'dir-schema': 'rnaseq-v2',
       'primary': True,
+      'ubkg_code': 'C200810',
       'vitessce-hints': ()}),
 
     ("metadata_SNT588.HFTQ.737_visium_sennet.tsv",
@@ -104,6 +113,7 @@ def test_sample_path():
       'is-multi-assay': True,
       'must-contain': ('Histology', 'RNAseq'),
       'primary': True,
+      'ubkg_code': 'C200740',
       'vitessce-hints': ()}),
 
     ("metadata_SNT588.HFTQ.737_visium_hande_sennet.tsv",
@@ -113,6 +123,7 @@ def test_sample_path():
       'description': 'H&E Stained Microscopy',
       'dir-schema': 'histology-v2',
       'primary': True,
+      'ubkg_code': 'C200940',
       'vitessce-hints': ()}),
 
     ("metadata_SNT588.HFTQ.737_visium_scrnaseq_sennet.tsv",
@@ -122,6 +133,7 @@ def test_sample_path():
       'description': 'Capture bead RNAseq (10x Genomics v3)',
       'dir-schema': 'rnaseq-v2',
       'primary': True,
+      'ubkg_code': 'C200810',
       'vitessce-hints': ()}),
 
 ))
