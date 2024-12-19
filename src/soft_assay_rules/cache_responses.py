@@ -29,8 +29,8 @@ def get_urls():
     """
     if APP_CTX == "HUBMAP":
         #assaytype_url = 'https://ingest-api.test.hubmapconsortium.org/'
-        #assaytype_url = 'https://ingest.api.hubmapconsortium.org/'
-        assaytype_url = 'https://ingest-api.dev.hubmapconsortium.org/'
+        assaytype_url = 'https://ingest.api.hubmapconsortium.org/'
+        #assaytype_url = 'https://ingest-api.dev.hubmapconsortium.org/'
         entity_url = 'https://entity.api.hubmapconsortium.org/'
         return assaytype_url, entity_url
     elif APP_CTX == "SENNET":
@@ -69,6 +69,17 @@ def save_metadata_json(uuid, app_ctx, json_dict):
     fname = build_cached_json_fname(uuid, app_ctx,
                                     dir="captured_metadata_json",
                                     prefix="metadata")
+    LOGGER.info(f"Saving metadata JSON to {fname}")
+    with open(fname, "w") as ofile:
+        json.dump(json_dict, ofile)
+        ofile.write("\n")
+
+
+def save_rulechain_json(uuid, app_ctx, json_dict):
+    """Save a copy for future use in unit tests"""
+    fname = build_cached_json_fname(uuid, app_ctx,
+                                    dir="captured_rulechain_json",
+                                    prefix="rulechain")
     LOGGER.info(f"Saving metadata JSON to {fname}")
     with open(fname, "w") as ofile:
         json.dump(json_dict, ofile)
@@ -144,9 +155,9 @@ def main() -> None:
                 is_human = source_is_human([uuid], get_entity_json)
                 LOGGER.info(f"{APP_CTX} {uuid} produces source_is_human {is_human}")
                 payload = get_metadata_json(uuid)
-                payload["source_is_human"] = is_human
                 save_metadata_json(uuid, APP_CTX, payload)
                 current_rule_output = get_rulechain_json(uuid)
+                save_rulechain_json(uuid, APP_CTX, current_rule_output)
                 print_rslt("in-line uuid", uuid,
                            payload,
                            current_rule_output,
