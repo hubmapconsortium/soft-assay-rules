@@ -23,6 +23,7 @@ LOGGER = logging.getLogger(__name__)
 AUTH_TOK = environ.get("AUTH_TOK")
 APP_CTX = environ.get("APP_CTX")
 
+
 def get_urls():
     """
     Returns assaytype_url, entity_url as a tuple
@@ -32,7 +33,6 @@ def get_urls():
         assaytype_url = 'https://ingest.api.hubmapconsortium.org/'
         #assaytype_url = 'https://ingest-api.dev.hubmapconsortium.org/'
         entity_url = 'https://entity.api.hubmapconsortium.org/'
-        return assaytype_url, entity_url
     elif APP_CTX == "SENNET":
         assaytype_url = 'https://ingest.api.sennetconsortium.org/'
         entity_url = 'https://entity.api.sennetconsortium.org/'
@@ -42,6 +42,10 @@ def get_urls():
             raise RuntimeError(f"Unknown APP_CTX {APP_CTX}")
         else:
             raise RuntimeError("Environment does not contain APP_CTX")
+    ubkg_url = 'https://ontology.api.hubmapconsortium.org/'
+    #ubkg_url = 'https://ontology-api.dev.hubmapconsortium.org/'
+
+    return assaytype_url, entity_url, ubkg_url
 
 
 def build_cached_json_fname(uuid, app_ctx,
@@ -55,35 +59,41 @@ def build_cached_json_fname(uuid, app_ctx,
     return fname
 
 
-def save_entity_json(uuid, app_ctx, json_dict):
+def save_generic_json(uuid, app_ctx, json_dict,
+                      dirname,
+                      prefix):
     """Save a copy for future use in unit tests"""
-    fname = build_cached_json_fname(uuid, app_ctx)
-    LOGGER.info(f"Saving JSON to {fname}")
+    fname = build_cached_json_fname(uuid, app_ctx,
+                                    dir=dirname,
+                                    prefix=prefix)
+    LOGGER.info(f"Saving {prefix} JSON to {fname}")
     with open(fname, "w") as ofile:
         json.dump(json_dict, ofile)
         ofile.write("\n")
+
+
+def save_entity_json(uuid, app_ctx, json_dict):
+    save_generic_json(uuid, app_ctx, json_dict,
+                      dirname="captured_entity_json",
+                      prefix="entity")
 
 
 def save_metadata_json(uuid, app_ctx, json_dict):
-    """Save a copy for future use in unit tests"""
-    fname = build_cached_json_fname(uuid, app_ctx,
-                                    dir="captured_metadata_json",
-                                    prefix="metadata")
-    LOGGER.info(f"Saving metadata JSON to {fname}")
-    with open(fname, "w") as ofile:
-        json.dump(json_dict, ofile)
-        ofile.write("\n")
+    save_generic_json(uuid, app_ctx, json_dict,
+                      dirname="captured_metadata_json",
+                      prefix="metadata")
 
 
 def save_rulechain_json(uuid, app_ctx, json_dict):
-    """Save a copy for future use in unit tests"""
-    fname = build_cached_json_fname(uuid, app_ctx,
-                                    dir="captured_rulechain_json",
-                                    prefix="rulechain")
-    LOGGER.info(f"Saving metadata JSON to {fname}")
-    with open(fname, "w") as ofile:
-        json.dump(json_dict, ofile)
-        ofile.write("\n")
+    save_generic_json(uuid, app_ctx, json_dict,
+                      dirname="captured_rulechain_json",
+                      prefix="rulechain")
+
+
+def save_ubkg_json(ubkg_code, app_ctx, json_dict):
+    save_generic_json(ubkg_code, app_ctx, json_dict,
+                      dirname="captured_ubkg_json",
+                      prefix="ubkg")
 
 
 def get_entity_json(ds_uuid: str) -> dict:
@@ -140,6 +150,21 @@ def get_rulechain_json(ds_uuid:str) -> dict:
     return rply.json()
 
 
+def get_ubkg_json(ubkg_code: str) -> dict:
+    """
+    Given a ubkg code and the (implicit) request, return the
+    the UBKG value associated with the code on the endpoint.
+    """
+    assert APP_CTX, "APP_CTX was not found in the environment"
+    ubkg_url = get_urls()[2]
+    response = requests.get(ubkg_url + "assayclasses/" + ubkg_code,
+                            params={"application_context": APP_CTX}
+                            )
+    response.raise_for_status()
+
+    return response.json()
+
+
 def main() -> None:
     if sys.argv[1] == "--help":
         print(
@@ -158,6 +183,7 @@ def main() -> None:
                 save_metadata_json(uuid, APP_CTX, payload)
                 current_rule_output = get_rulechain_json(uuid)
                 save_rulechain_json(uuid, APP_CTX, current_rule_output)
+                # UBKG json is cached by the separate tool cache_ubkg_responses.py
                 print_rslt("in-line uuid", uuid,
                            payload,
                            current_rule_output,

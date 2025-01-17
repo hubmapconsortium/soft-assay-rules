@@ -7,9 +7,8 @@ uuid lookup, but it provides support for CI tests.
 import sys
 import requests
 import json
-import yaml
-import re
 import logging
+from collections.abc import Callable
 from pathlib import Path
 from pprint import pprint, pformat
 import pandas as pd
@@ -28,19 +27,23 @@ from rule_chain import (
     RuleLogicException,
 )
 
-logging.basicConfig(encoding="utf-8", level=logging.INFO)
+logging.basicConfig(encoding="utf-8")
 LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
 CHAIN_INPUT_PATH = Path(__file__).parent / "testing_rule_chain.json"
 
-rule_chain = None
+body_rule_chain = None
+post_rule_chain = None
 
 
-def initialize_rule_chain():
-    global rule_chain
+def initialize_rule_chains():
+    global body_rule_chain, post_rule_chain
     localized_chain_input_path = (Path(__file__).resolve().parent / CHAIN_INPUT_PATH).resolve()
     with open(localized_chain_input_path) as chain_file:
-        rule_chain = RuleLoader(chain_file).load()
+        rule_chain_dict = RuleLoader(chain_file).load()
+        body_rule_chain = rule_chain_dict["body"]
+        post_rule_chain = rule_chain_dict["post"]
 
 
 def lookup_entity_json(uuid):
@@ -56,7 +59,7 @@ def lookup_entity_json(uuid):
         if Path(fname).exists():
             with open(fname) as infile:
                 json_dict = json.load(infile)
-                LOGGER.debug(f"JSON provided: {json_dict.keys()}")
+                LOGGER.debug(f"cached entity JSON for {uuid} provided: {json_dict.keys()}")
             return app_ctx, json_dict
     raise ValueError(f"No cached JSON for {uuid}")
 
@@ -81,6 +84,7 @@ def lookup_metadata_json(uuid):
         if Path(fname).exists():
             with open(fname) as infile:
                 json_dict = json.load(infile)
+                LOGGER.debug(f"cached metadata JSON for {uuid} provided: {json_dict.keys()}")
             return app_ctx, json_dict
     raise ValueError(f"No cached metadata JSON for {uuid}")
 
@@ -105,6 +109,7 @@ def lookup_rulechain_json(uuid):
         if Path(fname).exists():
             with open(fname) as infile:
                 json_dict = json.load(infile)
+                LOGGER.debug(f"cached rulechain JSON for {uuid} provided: {json_dict.keys()}")
             return app_ctx, json_dict
     raise ValueError(f"No cached rulechain JSON for {uuid}")
 
@@ -114,26 +119,56 @@ def wrapped_lookup_rulechain_json(uuid):
     return lookup_rulechain_json(uuid)[1]
 
 
-def post_rule_transform(rule_output: dict,
-                        source_is_human: bool) -> dict:
-    rslt = rule_output.copy()
-    if "contains-pii" in rslt:
-        rslt["contains-pii"] = rslt["contains-pii"] and source_is_human
-    return rslt
+def lookup_ubkg_json(ubkg_code):
+    """
+    Check the directory of cached ubkg json files for the given example. Return the
+    associated JSON dict if one is found.  Otherwise raise ValueError.
+    """
+    for app_ctx in ["SENNET", "HUBMAP", "ANY"]:
+        fname = build_cached_json_fname(ubkg_code, app_ctx,
+                                        dir="captured_ubkg_json",
+                                        prefix="ubkg")
+        if Path(fname).exists():
+            with open(fname) as infile:
+                json_dict = json.load(infile)
+                LOGGER.debug(f"cached ubkg JSON for {ubkg_code} provided: {json_dict.keys()}")
+            return app_ctx, json_dict
+    raise ValueError(f"No ubkg JSON for {ubkg_code}")
 
 
-def calculate_assay_info(metadata: dict, source_is_human: bool) -> dict:
+def wrapped_lookup_ubkg_json(ubkg_code):
+    """Like lookup_ubkg_json but drop the app_ctx"""
+    return lookup_ubkg_json(ubkg_code)[1]
+
+
+def calculate_assay_info(metadata: dict,
+                         source_is_human: bool,
+                         lookup_ubkg: Callable[[str], dict]
+                         ) -> dict:
     # TODO: this function should really get imported from ingest-api
-    if not rule_chain:
-        initialize_rule_chain()
+    if body_rule_chain is None or post_rule_chain is None:
+        initialize_rule_chains()
     for key, value in metadata.items():
         if type(value) is str:
             if value.isdigit():
                 metadata[key] = int(value)
     try:
-        rslt = post_rule_transform(rule_chain.apply(metadata),
-                                   source_is_human)
-        # TODO: check that rslt has the expected parts
+        body_values = body_rule_chain.apply(metadata)
+        assert "ubkg_code" in body_values, ("Rule matched but lacked ubkg_code:"
+                                            f" {body_values}")
+        ubkg_values = lookup_ubkg(body_values.get("ubkg_code", "NO_CODE")).get("value", {})
+        rslt = post_rule_chain.apply(
+            {},
+            ctx={
+                "source_is_human": source_is_human,
+                "values": body_values,
+                "ubkg_values": ubkg_values,
+                # "DEBUG": True
+            }
+        )
+        # print("RESULT FOLLOWS")
+        # pprint(rslt)
+        # print("RESULT ABOVE")
         return rslt
     except NoMatchException:
         return {}
@@ -174,8 +209,9 @@ def main() -> None:
                     LOGGER.info(f"source_is_human for [{uuid}] returns {is_human}")
                     payload = wrapped_lookup_metadata_json(uuid)
                     LOGGER.debug(f"PAYLOAD: \n" + pformat(payload))
-                    rslt = calculate_assay_info(payload, is_human)
                     cached_rslt = wrapped_lookup_rulechain_json(uuid)
+                    LOGGER.debug(f"EXPECTED RESULT: \n" + pformat(cached_rslt))
+                    rslt = calculate_assay_info(payload, is_human, wrapped_lookup_ubkg_json)
                     for elt in rslt:
                         val = rslt[elt]
                         cached_val = cached_rslt.get(elt)
@@ -195,7 +231,7 @@ def main() -> None:
                         LOGGER.info(f"source_is_human {parent_sample_ids} returns {is_human}")
                     else:
                         is_human = True  # legacy data is all human
-                    rslt = calculate_assay_info(payload, is_human)
+                    rslt = calculate_assay_info(payload, is_human, wrapped_lookup_ubkg_json)
                     print_rslt(argfile, idx, payload, rslt)
         elif argfile.endswith('.json'):
             with open(argfile) as jsonfile:
@@ -205,7 +241,7 @@ def main() -> None:
                 # needed.  But we have no way to tell if the source was human,
                 # so assume that it is human.
                 LOGGER.debug(f"RELOADED PAYLOAD: \n" + pformat(payload))
-                rslt = calculate_assay_info(payload, True)
+                rslt = calculate_assay_info(payload, True, wrapped_lookup_ubkg_json)
                 print_rslt(argfile, 0, payload, rslt)
         else:
             raise RuntimeError(f"Arg file {argfile} is of an"
