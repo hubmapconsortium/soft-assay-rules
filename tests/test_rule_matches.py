@@ -6,7 +6,11 @@ import pandas as pd
 import pytest
 from pprint import pprint
 
-from local_rule_tester import calculate_assay_info, wrapped_lookup_entity_json
+from local_rule_tester import (
+    calculate_assay_info,
+    wrapped_lookup_entity_json,
+    wrapped_lookup_ubkg_json
+)
 from source_is_human import source_is_human
 
 @pytest.fixture
@@ -16,13 +20,25 @@ def test_sample_path():
             / 'soft_assay_rules'
             / 'test_examples'
             )
-    
+
+
+def lists_to_sets(dct):
+    """
+    Convert the values in the input dict which are lists or tuples to sets,
+    so that comparisons will not be order-dependent.
+    """
+    return {
+        key: set(val) if isinstance(val, (list, tuple)) else val
+        for key, val in dct.items()
+    }
+
 
 @pytest.mark.parametrize(('test_data_fname', 'expected'), (
 
     ("salmon_json_c019a1cd35aab4d2b4a6ff221e92aaab.json",
      {"assaytype": "salmon_sn_rnaseq_10x",
       "contains-pii": False,
+      "dataset-type": "RNAseq",
       "description": "snRNAseq [Salmon]",
       "primary": False,
       "vitessce-hints": ("is_sc", "rna", "json_based"),
@@ -69,6 +85,7 @@ def test_sample_path():
     ("salmon_json_e8d642084fc5ec8b5d348ebab96a4b22.json",
      {'assaytype': 'salmon_rnaseq_10x',
       'contains-pii': False,
+      'dataset-type': 'RNAseq',
       'description': 'scRNAseq (10x Genomics) [Salmon]',
       'primary': False,
       'vitessce-hints': ('is_sc', 'rna', 'json_based'),
@@ -78,6 +95,7 @@ def test_sample_path():
     ("salmon_anndata_6efe308f2e7360127e47865edf075424.json",
      {'assaytype': 'salmon_rnaseq_10x',
       'contains-pii': False,
+      'dataset-type': 'RNAseq',
       'description': 'scRNAseq (10x Genomics) [Salmon]',
       'primary': False,
       'vitessce-hints': ('is_sc', 'rna'),
@@ -155,7 +173,8 @@ def test_rule_match_case(test_sample_path, test_data_fname, expected, tmp_path):
                                            wrapped_lookup_entity_json)
             else:
                 is_human = True  # legacy data is all human
-            rslt = calculate_assay_info(payload, is_human)
+            rslt = calculate_assay_info(payload, is_human,
+                                        wrapped_lookup_ubkg_json)
             assert rslt, f"{test_data_fname} record {idx} failed"
     elif str(md_path).endswith('.json'):
         with open(md_path) as jsonfile:
@@ -170,8 +189,9 @@ def test_rule_match_case(test_sample_path, test_data_fname, expected, tmp_path):
                                            wrapped_lookup_entity_json)
             else:
                 is_human = True  # legacy data is all human
-            rslt = calculate_assay_info(payload, is_human)
+            rslt = calculate_assay_info(payload, is_human,
+                                        wrapped_lookup_ubkg_json)
             assert rslt, f"{test_data_fname} record failed"
     else:
         assert False, f"Metadata path {md_path} is not .tsv or .json"
-    assert rslt == expected
+    assert lists_to_sets(rslt) == lists_to_sets(expected)

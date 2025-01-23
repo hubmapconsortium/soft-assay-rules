@@ -851,9 +851,27 @@
         "rule_description": "use UBKG description if available"
     },
     {
+        "type": "note",
+        "match": "true",
+        "value": "{'final_must_contain': (ubkg_values&['must_contain'] ? ubkg_values&['must_contain'] : values&['must-contain'])}",
+        "rule_description": "use UBKG must_contain if available"
+    },
+    {
+        "type": "note",
+        "match": "true",
+        "value": "{'final_is_multi_assay': (ubkg_values&['is_multi_assay'] ? ubkg_values&['is_multi_assay'] : values&['is-multi-assay'])}",
+        "rule_description": "use UBKG must_contain if available"
+    },
+    {
+        "type": "note",
+        "match": "true",
+        "value": "{'final_pipeline_shorthand': (ubkg_values&['pipeline_shorthand'] ? ubkg_values&['pipeline_shorthand'] : values&['pipeline-shorthand'])}",
+        "rule_description": "use UBKG must_contain if available"
+    },
+    {
         "type": "match",
         "match": "true",
-        "value": "{'contains-pii': final_contains_pii, 'vitessce-hints': final_vitessce_hints, 'assaytype': final_assay_type, 'dir-schema': final_dir_schema, 'primary': final_primary, 'dataset-type': final_dataset_type, 'description': final_description}",
+        "value": "{'contains-pii': final_contains_pii, 'vitessce-hints': final_vitessce_hints, 'assaytype': final_assaytype, 'dir-schema': final_dir_schema, 'primary': final_primary, 'dataset-type': final_dataset_type, 'description': final_description, 'must-contain': final_must_contain, 'is-multi-assay': final_is_multi_assay, 'pipeline-shorthand': final_pipeline_shorthand, 'ubkg_code': values&['ubkg_code']}",
         "rule_description": "return expected values"
     }
   ]

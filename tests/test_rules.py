@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 from pprint import pprint
 
-from local_rule_tester import calculate_assay_info
+from local_rule_tester import calculate_assay_info, wrapped_lookup_ubkg_json
 
 @pytest.fixture
 def test_sample_path():
@@ -36,13 +36,13 @@ def test_rule_case(test_sample_path, test_data_fname, tmp_path):
         print(arg_df)
         for idx, row in arg_df.iterrows():
             payload = {col: row[col] for col in arg_df.columns}
-            rslt = calculate_assay_info(payload, True)
+            rslt = calculate_assay_info(payload, True, wrapped_lookup_ubkg_json)
             assert rslt, f"{test_data_fname} record {idx} failed"
     elif str(md_path).endswith('.json'):
         with open(md_path) as jsonfile:
             payload = json.load(jsonfile)
             print(json.dumps(payload))
-            rslt = calculate_assay_info(payload, True)
+            rslt = calculate_assay_info(payload, True, wrapped_lookup_ubkg_json)
             assert rslt, f"{test_data_fname} record failed"
     else:
         assert False, f"Metadata path {md_path} is not .tsv or .json"

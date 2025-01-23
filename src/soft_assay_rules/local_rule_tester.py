@@ -166,9 +166,7 @@ def calculate_assay_info(metadata: dict,
                 # "DEBUG": True
             }
         )
-        # print("RESULT FOLLOWS")
-        # pprint(rslt)
-        # print("RESULT ABOVE")
+        rslt = {key: val for key, val in rslt.items() if val is not None}
         return rslt
     except NoMatchException:
         return {}
@@ -180,7 +178,7 @@ def smart_equality(val1, val2):
     as sets, etc.
     """
     if isinstance(val1, (list, tuple)):
-        if isinstance(val2, list):
+        if isinstance(val2, (list, tuple)):
             return set(val1) == set(val2)
         else:
             return False
