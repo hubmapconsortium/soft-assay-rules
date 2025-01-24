@@ -36,10 +36,11 @@
     "rule_chain_dict": {
       "type": "object",
       "properties": {
+	"pre": { "$ref": "#/definitions/rule_chain" },
 	"body": { "$ref": "#/definitions/rule_chain" },
 	"post": { "$re": "#/definitions/rule_chain" }
       },
-      "required": ["body", "post"],
+      "required": ["body", "pre", "post"],
       "additionalProperties": false
     }
   }

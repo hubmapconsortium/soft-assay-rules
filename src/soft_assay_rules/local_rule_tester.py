@@ -33,15 +33,17 @@ LOGGER.setLevel(logging.INFO)
 
 CHAIN_INPUT_PATH = Path(__file__).parent / "testing_rule_chain.json"
 
+pre_rule_chain = None
 body_rule_chain = None
 post_rule_chain = None
 
 
 def initialize_rule_chains():
-    global body_rule_chain, post_rule_chain
+    global pre_rule_chain, body_rule_chain, post_rule_chain
     localized_chain_input_path = (Path(__file__).resolve().parent / CHAIN_INPUT_PATH).resolve()
     with open(localized_chain_input_path) as chain_file:
         rule_chain_dict = RuleLoader(chain_file).load()
+        pre_rule_chain = rule_chain_dict["pre"]
         body_rule_chain = rule_chain_dict["body"]
         post_rule_chain = rule_chain_dict["post"]
 
@@ -146,14 +148,16 @@ def calculate_assay_info(metadata: dict,
                          lookup_ubkg: Callable[[str], dict]
                          ) -> dict:
     # TODO: this function should really get imported from ingest-api
-    if body_rule_chain is None or post_rule_chain is None:
+    if any(elt is None
+           for elt in [pre_rule_chain, body_rule_chain, post_rule_chain]):
         initialize_rule_chains()
     for key, value in metadata.items():
         if type(value) is str:
             if value.isdigit():
                 metadata[key] = int(value)
     try:
-        body_values = body_rule_chain.apply(metadata)
+        pre_values = pre_rule_chain.apply(metadata)
+        body_values = body_rule_chain.apply(metadata, ctx=pre_values)
         assert "ubkg_code" in body_values, ("Rule matched but lacked ubkg_code:"
                                             f" {body_values}")
         ubkg_values = lookup_ubkg(body_values.get("ubkg_code", "NO_CODE")).get("value", {})
@@ -163,6 +167,7 @@ def calculate_assay_info(metadata: dict,
                 "source_is_human": source_is_human,
                 "values": body_values,
                 "ubkg_values": ubkg_values,
+                "pre_values": pre_values,
                 # "DEBUG": True
             }
         )

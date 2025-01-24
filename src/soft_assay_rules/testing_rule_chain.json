@@ -2,54 +2,6 @@
   "body":
   [
     {
-        "type": "note",
-        "match": "metadata_schema_id == null",
-        "value": "{'not_dcwg': true, 'is_dcwg': false}",
-        "rule_description": "Preamble rule identifying DCWG"
-    },
-    {
-        "type": "note",
-        "match": "metadata_schema_id != null",
-        "value": "{'not_dcwg': false, 'is_dcwg': true}",
-        "rule_description": "Preamble rule identifying non-DCWG"
-    },
-    {
-        "type": "note",
-        "match": "creation_action == 'Create Dataset Activity' or creation_action == 'Multi-Assay Split' or (creation_action == null and (dataset_type != null or assay_type != null))",
-        "value": "{'is_primary': true}",
-        "rule_description": "Preamble rule identifying primary datasets"
-    },
-    {
-        "type": "note",
-        "match": "creation_action == 'Central Process'",
-        "value": "{'is_central_processed': true}",
-        "rule_description": "Preamble rule identifying centrally processed datasets"
-    },
-    {
-        "type": "note",
-        "match": "creation_action == 'Create Publication Activity' or dataset_type == 'Publication' or assay_type == 'publication'",
-        "value": "{'is_publication': true}",
-        "rule_description": "Preamble rule identifying publications"
-    },
-    {
-        "type": "note",
-        "match": "creation_action == 'Lab Process'",
-        "value": "{'is_lab_processed': true}",
-        "rule_description": "Preamble rule identifying lab processed datasets"
-    },
-    {
-        "type": "note",
-        "match": "not_dcwg and is_primary and version == null",
-        "value": "{'version': 0}",
-        "rule_description": "Cover default schema version = 0 for non-DCWG metadata"
-    },
-    {
-        "type": "note",
-        "match": "creation_action == 'External Process' or (parent_dataset_id != null and derived_dataset_type != null)",
-        "value": "{'is_epic': true}",
-        "rule_description": "Preamble rule identifying EPIC"
-    },
-    {
         "type": "match",
         "match": "not_dcwg and is_primary and assay_type in ['AF']",
         "value": "{'ubkg_code': 'C200001', 'assaytype': 'AF', 'dir-schema': 'af-v0', 'tbl-schema': 'af-v'+version.to_str, 'vitessce-hints': [], 'contains-pii': false, 'primary': true, 'description': 'Auto-fluorescence Microscopy', 'dataset-type': 'Auto-fluorescence' }",
@@ -806,7 +758,64 @@
         "rule_description": "DCWG xenium"
     }
   ],
-  "post":
+"pre":
+  [
+    {
+        "type": "note",
+        "match": "metadata_schema_id == null",
+        "value": "{'not_dcwg': true, 'is_dcwg': false}",
+        "rule_description": "Preamble rule identifying DCWG"
+    },
+    {
+        "type": "note",
+        "match": "metadata_schema_id != null",
+        "value": "{'not_dcwg': false, 'is_dcwg': true}",
+        "rule_description": "Preamble rule identifying non-DCWG"
+    },
+    {
+        "type": "note",
+        "match": "creation_action == 'Create Dataset Activity' or creation_action == 'Multi-Assay Split' or (creation_action == null and (dataset_type != null or assay_type != null))",
+        "value": "{'is_primary': true}",
+        "rule_description": "Preamble rule identifying primary datasets"
+    },
+    {
+        "type": "note",
+        "match": "creation_action == 'Central Process'",
+        "value": "{'is_central_processed': true}",
+        "rule_description": "Preamble rule identifying centrally processed datasets"
+    },
+    {
+        "type": "note",
+        "match": "creation_action == 'Create Publication Activity' or dataset_type == 'Publication' or assay_type == 'publication'",
+        "value": "{'is_publication': true}",
+        "rule_description": "Preamble rule identifying publications"
+    },
+    {
+        "type": "note",
+        "match": "creation_action == 'Lab Process'",
+        "value": "{'is_lab_processed': true}",
+        "rule_description": "Preamble rule identifying lab processed datasets"
+    },
+    {
+        "type": "note",
+        "match": "not_dcwg and is_primary and version == null",
+        "value": "{'version': 0}",
+        "rule_description": "Cover default schema version = 0 for non-DCWG metadata"
+    },
+    {
+        "type": "note",
+        "match": "creation_action == 'External Process' or (parent_dataset_id != null and derived_dataset_type != null)",
+        "value": "{'is_epic': true}",
+        "rule_description": "Preamble rule identifying EPIC"
+    },
+    {
+        "type": "match",
+        "match": "true",
+        "value": "{'not_dcwg': not_dcwg, 'is_dcwg': is_dcwg, 'is_primary': is_primary, 'is_central_processed': is_central_processed, 'is_publication': is_publcation, 'is_lab_processed': is_lab_processed, 'version': version, 'is_epic': is_epic}",
+        "rule_description": "return expected values from preamble"
+    }
+  ],
+"post":
   [
     {
         "type": "note",
@@ -869,9 +878,15 @@
         "rule_description": "use UBKG must_contain if available"
     },
     {
+        "type": "note",
+        "match": "true",
+        "value": "{'final_tbl_schema': (ubkg_values&['tbl_schema'] ? ubkg_values&['tbl_schema']+pre_values['version'].to_str : values&['tbl-schema'])}",
+        "rule_description": "use UBKG must_contain if available"
+    },
+    {
         "type": "match",
         "match": "true",
-        "value": "{'contains-pii': final_contains_pii, 'vitessce-hints': final_vitessce_hints, 'assaytype': final_assaytype, 'dir-schema': final_dir_schema, 'primary': final_primary, 'dataset-type': final_dataset_type, 'description': final_description, 'must-contain': final_must_contain, 'is-multi-assay': final_is_multi_assay, 'pipeline-shorthand': final_pipeline_shorthand, 'ubkg_code': values&['ubkg_code']}",
+        "value": "{'contains-pii': final_contains_pii, 'vitessce-hints': final_vitessce_hints, 'assaytype': final_assaytype, 'dir-schema': final_dir_schema, 'primary': final_primary, 'dataset-type': final_dataset_type, 'description': final_description, 'must-contain': final_must_contain, 'is-multi-assay': final_is_multi_assay, 'pipeline-shorthand': final_pipeline_shorthand, 'tbl-schema': final_tbl_schema, 'ubkg_code': values&['ubkg_code']}",
         "rule_description": "return expected values"
     }
   ]
