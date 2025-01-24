@@ -6,7 +6,11 @@ import pandas as pd
 import pytest
 from pprint import pprint
 
-from local_rule_tester import calculate_assay_info, wrapped_lookup_json
+from local_rule_tester import (
+    calculate_assay_info,
+    wrapped_lookup_entity_json,
+    wrapped_lookup_ubkg_json
+)
 from source_is_human import source_is_human
 
 @pytest.fixture
@@ -16,13 +20,29 @@ def test_sample_path():
             / 'soft_assay_rules'
             / 'test_examples'
             )
-    
 
+
+def lists_to_sets_drop_nulls(dct):
+    """
+    Convert the values in the input dict which are lists or tuples to sets,
+    so that comparisons will not be order-dependent.
+    """
+    rslt = {}
+    for key, val in dct.items():
+        if val is None:
+            pass
+        else:
+            rslt[key] = set(val) if isinstance(val, (list, tuple)) else val
+    return rslt
+
+
+@pytest.mark.filterwarnings("ignore:.*np.find_common_type is deprecated")
 @pytest.mark.parametrize(('test_data_fname', 'expected'), (
 
     ("salmon_json_c019a1cd35aab4d2b4a6ff221e92aaab.json",
      {"assaytype": "salmon_sn_rnaseq_10x",
       "contains-pii": False,
+      "dataset-type": "RNAseq",
       "description": "snRNAseq [Salmon]",
       "primary": False,
       "vitessce-hints": ("is_sc", "rna", "json_based"),
@@ -69,6 +89,7 @@ def test_sample_path():
     ("salmon_json_e8d642084fc5ec8b5d348ebab96a4b22.json",
      {'assaytype': 'salmon_rnaseq_10x',
       'contains-pii': False,
+      'dataset-type': 'RNAseq',
       'description': 'scRNAseq (10x Genomics) [Salmon]',
       'primary': False,
       'vitessce-hints': ('is_sc', 'rna', 'json_based'),
@@ -78,23 +99,22 @@ def test_sample_path():
     ("salmon_anndata_6efe308f2e7360127e47865edf075424.json",
      {'assaytype': 'salmon_rnaseq_10x',
       'contains-pii': False,
+      'dataset-type': 'RNAseq',
       'description': 'scRNAseq (10x Genomics) [Salmon]',
       'primary': False,
       'vitessce-hints': ('is_sc', 'rna'),
       'ubkg_code': 'C200500',
       'pipeline-shorthand': 'Salmon'}),
 
-    # Disable this test because sample_is_human is not being
-    # correctly resolved in this version
-    # ("metadata_SNT594.FZCM.747_SENNET.json",
-    #  {'assaytype': 'scRNAseq-10xGenomics-v3',
-    #   'contains-pii': False,
-    #   'dataset-type': 'RNAseq',
-    #   'description': 'scRNAseq (10x Genomics v3)',
-    #   'dir-schema': 'rnaseq-v2',
-    #   'primary': True,
-    #   'ubkg_code': 'C200850',
-    #   'vitessce-hints': ()}),
+    ("metadata_SNT594.FZCM.747_SENNET.json",
+     {'assaytype': 'scRNAseq-10xGenomics-v3',
+      'contains-pii': False,
+      'dataset-type': 'RNAseq',
+      'description': 'scRNAseq (10x Genomics v3)',
+      'dir-schema': 'rnaseq-v2',
+      'primary': True,
+      'ubkg_code': 'C200850',
+      'vitessce-hints': ()}),
 
     ("metadata_HBM263.FTWN.879_visium_rnaseq_hubmap.tsv",
      {'assaytype': 'rnaseq-visium-no-probes',
@@ -153,18 +173,29 @@ def test_rule_match_case(test_sample_path, test_data_fname, expected, tmp_path):
                 # samples, so we can check source type
                 parent_sample_ids = payload["parent_sample_id"].split(",")
                 parent_sample_ids = [elt.strip() for elt in parent_sample_ids]
-                is_human = source_is_human(parent_sample_ids, wrapped_lookup_json)
+                is_human = source_is_human(parent_sample_ids,
+                                           wrapped_lookup_entity_json)
             else:
                 is_human = True  # legacy data is all human
-            payload["source_is_human"] = is_human
-            rslt = calculate_assay_info(payload)
+            rslt = calculate_assay_info(payload, is_human,
+                                        wrapped_lookup_ubkg_json)
             assert rslt, f"{test_data_fname} record {idx} failed"
     elif str(md_path).endswith('.json'):
         with open(md_path) as jsonfile:
             payload = json.load(jsonfile)
             print(json.dumps(payload))
-            rslt = calculate_assay_info(payload)
+            if "parent_sample_id" in payload:
+                # This sample is new enough to have a value for parent
+                # samples, so we can check source type
+                parent_sample_ids = payload["parent_sample_id"].split(",")
+                parent_sample_ids = [elt.strip() for elt in parent_sample_ids]
+                is_human = source_is_human(parent_sample_ids,
+                                           wrapped_lookup_entity_json)
+            else:
+                is_human = True  # legacy data is all human
+            rslt = calculate_assay_info(payload, is_human,
+                                        wrapped_lookup_ubkg_json)
             assert rslt, f"{test_data_fname} record failed"
     else:
         assert False, f"Metadata path {md_path} is not .tsv or .json"
-    assert rslt == expected
+    assert lists_to_sets_drop_nulls(rslt) == lists_to_sets_drop_nulls(expected)

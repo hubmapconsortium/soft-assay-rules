@@ -46,7 +46,6 @@ def main() -> None:
                         is_human = source_is_human([uuid], get_entity_json)
                         LOGGER.info(f"source_is_human {[uuid]} returns {is_human}")
                         payload = get_metadata_json(uuid)
-                        payload["source_is_human"] = is_human
                         assaytype_url = get_urls()[0]
                         rply = requests.get(
                             assaytype_url + 'assaytype' + '/' + uuid,
@@ -73,7 +72,6 @@ def main() -> None:
                             LOGGER.info(f"source_is_human {parent_sample_ids} returns {is_human}")
                         else:
                             is_human = True  # legacy data is all human
-                        payload["source_is_human"] = is_human
                         assaytype_url = get_urls()[0]
                         rply = requests.post(
                             assaytype_url + 'assaytype',
@@ -90,10 +88,9 @@ def main() -> None:
                         LOGGER.error(f"ERROR: {excp}")
         elif argfile.endswith('.json'):
             try:
+                # no good way to determine source_is_human in this case
                 with open(argfile) as jsonfile:
                     payload = json.load(jsonfile)
-                assert "source_is_human" in payload, ("cached payload {argfile} lacks"
-                                                      f" source_is_human")
                 assaytype_url = get_urls()[0]
                 rply = requests.post(
                     assaytype_url + 'assaytype',
@@ -108,6 +105,7 @@ def main() -> None:
                 print_rslt(argfile, None, payload, rslt)
             except requests.exceptions.HTTPError as excp:
                 LOGGER.error(f"ERROR: {excp}")
+                LOGGER.info(f"Error was in response to the following JSON:\n" + pformat(payload))
         else:
             raise RuntimeError(f"Arg file {argfile} is of an"
                                " unrecognized type")
