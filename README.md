@@ -80,17 +80,21 @@ $ python ./local_rule_tester.py test_examples/*
 ```
 ## Cached REST Endpoint Responses
 
-The utility routine `cache_responses.py` can be used to prefetch and save the entity-api metadata JSON
-blocks associated with a given uuid or HuBMAP/SenNet ID.  It is called as follows:
+The utility routines `cache_responses.py` and `cache_ubkg_responses.py`
+can be used to prefetch and save the entity-api, ingest-api, and UBKG metadata JSON
+blocks associated with a given uuid, HuBMAP/SenNet ID, or UBKG code.  They are called as follows:
 ```
 env AUTH_TOK=<some token> APP_CTX=<HUBMAP or SENNET> python cache_responses.py uuid1 [uuid2 [uuid3...]]
+env AUTH_TOK=<some token> APP_CTX=<HUBMAP or SENNET> python cache_ubkg_responses.py ubkg_code
 ```
-This causes the entity-api JSON content for the uuid and the ingest-api/assayclassifier/metadata JSON
-content to be fetched and stored locally.  (If the value of "sample_is_human" is not present in the
-ingest-api/assayclassifier/metadata JSON fetched from the endpoint, it is inferred from the entity-api
-data and added before the JSON is cached).  The JSON returned by the deployed version of the rule chain
-is printed, for convenience in setting up new unit tests.  Thus a new unit test corresponding to a
+The first causes the entity-api JSON content for the uuid and the ingest-api/assayclassifier/metadata JSON
+content to be fetched and stored locally. The JSON returned by the deployed version of the rule chain
+is printed, for convenience in setting up new unit tests.  The second does the same for the UBKG response
+associated with the given code.
+
+Thus a new unit test corresponding to a
 specific uuid in a specific APP_CTX can be set up by:
 * prefetching and saving the appropriate JSON using `cache_responses.py`
+* prefetching the ubkg_code used by that output using `cache_ubkg_responses.py`
 * creating a new test case using that uuid, or the ingest metadata for that uuid
 * saving the expected JSON output of the rule chain as the desired test output
