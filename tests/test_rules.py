@@ -17,6 +17,7 @@ def test_sample_path():
             )
     
 
+@pytest.mark.filterwarnings("ignore:.*np.find_common_type is deprecated")
 @pytest.mark.parametrize(('test_data_fname'), (
     "metadata_HBM263.FTWN.879_visium_rnaseq_hubmap.tsv",
     'validated-HuBMAP-Visium-assay-metadata_1rec.tsv',

@@ -33,6 +33,7 @@ def lists_to_sets(dct):
     }
 
 
+@pytest.mark.filterwarnings("ignore:.*np.find_common_type is deprecated")
 @pytest.mark.parametrize(('test_data_fname', 'expected'), (
 
     ("salmon_json_c019a1cd35aab4d2b4a6ff221e92aaab.json",
