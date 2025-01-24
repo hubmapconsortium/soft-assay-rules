@@ -22,15 +22,18 @@ def test_sample_path():
             )
 
 
-def lists_to_sets(dct):
+def lists_to_sets_drop_nulls(dct):
     """
     Convert the values in the input dict which are lists or tuples to sets,
     so that comparisons will not be order-dependent.
     """
-    return {
-        key: set(val) if isinstance(val, (list, tuple)) else val
-        for key, val in dct.items()
-    }
+    rslt = {}
+    for key, val in dct.items():
+        if val is None:
+            pass
+        else:
+            rslt[key] = set(val) if isinstance(val, (list, tuple)) else val
+    return rslt
 
 
 @pytest.mark.filterwarnings("ignore:.*np.find_common_type is deprecated")
@@ -195,4 +198,4 @@ def test_rule_match_case(test_sample_path, test_data_fname, expected, tmp_path):
             assert rslt, f"{test_data_fname} record failed"
     else:
         assert False, f"Metadata path {md_path} is not .tsv or .json"
-    assert lists_to_sets(rslt) == lists_to_sets(expected)
+    assert lists_to_sets_drop_nulls(rslt) == lists_to_sets_drop_nulls(expected)

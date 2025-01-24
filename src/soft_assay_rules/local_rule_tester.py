@@ -171,7 +171,6 @@ def calculate_assay_info(metadata: dict,
                 # "DEBUG": True
             }
         )
-        rslt = {key: val for key, val in rslt.items() if val is not None}
         return rslt
     except NoMatchException:
         return {}
