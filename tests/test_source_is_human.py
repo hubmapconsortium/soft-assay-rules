@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 from pprint import pprint
 
-from local_rule_tester import wrapped_lookup_json
+from local_rule_tester import wrapped_lookup_entity_json
 from source_is_human import source_is_human
 
 logging.basicConfig(encoding="utf-8", level=logging.INFO)
@@ -23,5 +23,5 @@ LOGGER = logging.getLogger(__name__)
 ))
 def test_source_is_human(uuid_list, expected_value, tmp_path, caplog):
     with caplog.at_level(logging.DEBUG):
-        val = source_is_human(uuid_list, wrapped_lookup_json)
+        val = source_is_human(uuid_list, wrapped_lookup_entity_json)
         assert val == expected_value

@@ -1,0 +1,1 @@
+{"active_status": "active", "assaytype": "salmon_sn_rnaseq_10x", "contains_full_genetic_sequences": false, "dataset_type": "RNAseq", "description": "snRNAseq [Salmon]", "dir_schema": null, "is_multiassay": false, "must_contain": [], "pipeline_shorthand": "Salmon", "process_state": "derived", "tbl_schema": null, "vitessce_hints": ["rna", "is_sc"]}
