@@ -1,4 +1,3 @@
-import sys
 import logging
 import yaml
 import json
@@ -7,7 +6,6 @@ from rule_engine import Rule, EngineError, Context
 from hubmap_commons.schema_tools import check_json_matches_schema
 
 logger: logging.Logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 SCHEMA_FILE = 'rule_chain_schema.json'
 SCHEMA_BASE_URI = 'http://schemata.hubmapconsortium.org/'
@@ -119,8 +117,8 @@ class RuleChain:
             except EngineError as excp:
                 logger.error(f"ENGINE_ERROR {type(excp)} {excp}")
                 raise RuleLogicException(excp) from excp
-            if 'DEBUG' in ctx:
-                logger.debug("DONE")
+            if ctx.get("DEBUG"):
+                logger.debug("done")
         raise NoMatchException(f"No rule matched record {rec}")
 
 
