@@ -21,7 +21,7 @@ def main() -> None:
     if sys.argv[1] == "--help":
         print(
             f"""
-            Usage: env APP_CTK='SENNETorHUBMAP' {sys.argv[0]} uuid [uuid [uuid ...]]
+            Usage: env APP_CTX='SENNETorHUBMAP' {sys.argv[0]} uuid [uuid [uuid ...]]
             """
         )
     else:
