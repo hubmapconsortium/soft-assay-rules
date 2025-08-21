@@ -76,9 +76,9 @@ def lookup_metadata_json(uuid):
     the file.  If no such file is found, ValueError is raised.
     """
     for app_ctx in ["SENNET", "HUBMAP"]:
-        fname = build_cached_json_fname(uuid, app_ctx,
-                                        dir="captured_metadata_json",
-                                        prefix="metadata")
+        fname = build_cached_json_fname(
+            uuid, app_ctx, dir="captured_metadata_json", prefix="metadata"
+        )
         if Path(fname).exists():
             with open(fname) as infile:
                 json_dict = json.load(infile)
@@ -101,9 +101,9 @@ def lookup_rulechain_json(uuid):
     the file.  If no such file is found, ValueError is raised.
     """
     for app_ctx in ["SENNET", "HUBMAP"]:
-        fname = build_cached_json_fname(uuid, app_ctx,
-                                        dir="captured_rulechain_json",
-                                        prefix="rulechain")
+        fname = build_cached_json_fname(
+            uuid, app_ctx, dir="captured_rulechain_json", prefix="rulechain"
+        )
         if Path(fname).exists():
             with open(fname) as infile:
                 json_dict = json.load(infile)
@@ -123,9 +123,9 @@ def lookup_ubkg_json(ubkg_code):
     associated JSON dict if one is found.  Otherwise raise ValueError.
     """
     for app_ctx in ["SENNET", "HUBMAP", "ANY"]:
-        fname = build_cached_json_fname(ubkg_code, app_ctx,
-                                        dir="captured_ubkg_json",
-                                        prefix="ubkg")
+        fname = build_cached_json_fname(
+            ubkg_code, app_ctx, dir="captured_ubkg_json", prefix="ubkg"
+        )
         if Path(fname).exists():
             with open(fname) as infile:
                 json_dict = json.load(infile)
@@ -139,13 +139,11 @@ def wrapped_lookup_ubkg_json(ubkg_code):
     return lookup_ubkg_json(ubkg_code)[1]
 
 
-def calculate_assay_info(metadata: dict,
-                         source_is_human: bool,
-                         lookup_ubkg: Callable[[str], dict]
-                         ) -> dict:
+def calculate_assay_info(
+    metadata: dict, source_is_human: bool, lookup_ubkg: Callable[[str], dict]
+) -> dict:
     # TODO: this function should really get imported from ingest-api
-    if any(elt is None
-           for elt in [pre_rule_chain, body_rule_chain, post_rule_chain]):
+    if any(elt is None for elt in [pre_rule_chain, body_rule_chain, post_rule_chain]):
         initialize_rule_chains()
     for key, value in metadata.items():
         if type(value) is str:
@@ -154,8 +152,7 @@ def calculate_assay_info(metadata: dict,
     try:
         pre_values = pre_rule_chain.apply(metadata)
         body_values = body_rule_chain.apply(metadata, ctx=pre_values)
-        assert "ubkg_code" in body_values, ("Rule matched but lacked ubkg_code:"
-                                            f" {body_values}")
+        assert "ubkg_code" in body_values, "Rule matched but lacked ubkg_code:" f" {body_values}"
         ubkg_values = lookup_ubkg(body_values.get("ubkg_code", "NO_CODE")).get("value", {})
         rslt = post_rule_chain.apply(
             {},
@@ -165,7 +162,7 @@ def calculate_assay_info(metadata: dict,
                 "ubkg_values": ubkg_values,
                 "pre_values": pre_values,
                 # "DEBUG": True
-            }
+            },
         )
         return rslt
     except NoMatchException:
@@ -188,7 +185,7 @@ def smart_equality(val1, val2):
 
 def main() -> None:
     for argfile in sys.argv[1:]:
-        if argfile.endswith('~'):
+        if argfile.endswith("~"):
             LOGGER.info(f"Skipping {argfile}")
             continue  # probably an editor backup file
         if Path(argfile).is_dir():
@@ -196,9 +193,9 @@ def main() -> None:
             continue
         LOGGER.info(f"Reading {argfile}")
         arg_df = None
-        if argfile.endswith('.tsv'):
-            arg_df = pd.read_csv(argfile, sep='\t')
-            if len(arg_df.columns) == 1 and 'uuid' in arg_df.columns:
+        if argfile.endswith(".tsv"):
+            arg_df = pd.read_csv(argfile, sep="\t")
+            if len(arg_df.columns) == 1 and "uuid" in arg_df.columns:
                 for idx, row in arg_df.iterrows():
                     uuid = row["uuid"]
                     app_ctx, json_dict = lookup_entity_json(uuid)
@@ -214,8 +211,9 @@ def main() -> None:
                         val = rslt[elt]
                         cached_val = cached_rslt.get(elt)
                         if not smart_equality(val, cached_val):
-                            LOGGER.warning(f"DISCORDANT for {uuid} {elt}:"
-                                           f" {val} != {cached_val}")
+                            LOGGER.warning(
+                                f"DISCORDANT for {uuid} {elt}:" f" {val} != {cached_val}"
+                            )
                     print_rslt(argfile, idx, payload, rslt)
             else:
                 for idx, row in arg_df.iterrows():
@@ -231,7 +229,7 @@ def main() -> None:
                         is_human = True  # legacy data is all human
                     rslt = calculate_assay_info(payload, is_human, wrapped_lookup_ubkg_json)
                     print_rslt(argfile, idx, payload, rslt)
-        elif argfile.endswith('.json'):
+        elif argfile.endswith(".json"):
             with open(argfile) as jsonfile:
                 payload = json.load(jsonfile)
                 # This reloaded payload was captured from a valid assayclassifier
@@ -242,10 +240,9 @@ def main() -> None:
                 rslt = calculate_assay_info(payload, True, wrapped_lookup_ubkg_json)
                 print_rslt(argfile, 0, payload, rslt)
         else:
-            raise RuntimeError(f"Arg file {argfile} is of an"
-                               " unrecognized type")
-    LOGGER.info('done')
+            raise RuntimeError(f"Arg file {argfile} is of an" " unrecognized type")
+    LOGGER.info("done")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -9,14 +9,10 @@ import pandas as pd
 
 from source_is_human import source_is_human
 from test_utils import print_rslt
-from cache_responses import (
-    get_entity_json,
-    get_metadata_json,
-    get_urls
-)
+from cache_responses import get_entity_json, get_metadata_json, get_urls
 
-AUTH_TOK = environ['AUTH_TOK']
-APP_CTX = environ['APP_CTX']
+AUTH_TOK = environ["AUTH_TOK"]
+APP_CTX = environ["APP_CTX"]
 
 logging.basicConfig(encoding="utf-8", level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
@@ -24,33 +20,33 @@ LOGGER = logging.getLogger(__name__)
 
 def main() -> None:
     for argfile in sys.argv[1:]:
-        if argfile.endswith('~'):
+        if argfile.endswith("~"):
             LOGGER.info(f"Skipping {argfile}")
             continue  # probably an editor backup file
         if isdir(argfile):
             LOGGER.info(f"Skipping directory {argfile}")
             continue
         LOGGER.info(f"Reading {argfile}")
-        if argfile.endswith('.tsv'):
-            arg_df = pd.read_csv(argfile, sep='\t')
-            if len(arg_df.columns) == 1 and 'uuid' in arg_df.columns:
+        if argfile.endswith(".tsv"):
+            arg_df = pd.read_csv(argfile, sep="\t")
+            if len(arg_df.columns) == 1 and "uuid" in arg_df.columns:
                 for idx, row in arg_df.iterrows():
                     try:
-                        uuid = row['uuid']
+                        uuid = row["uuid"]
                         is_human = source_is_human([uuid], get_entity_json)
                         LOGGER.info(f"source_is_human {[uuid]} returns {is_human}")
                         payload = get_metadata_json(uuid)
                         assaytype_url = get_urls()[0]
                         rply = requests.get(
-                            assaytype_url + 'assaytype' + '/' + uuid,
+                            assaytype_url + "assaytype" + "/" + uuid,
                             headers={
-                                'Authorization': 'Bearer ' + AUTH_TOK,
-                                'content-type': 'application/json'
-                            }
+                                "Authorization": "Bearer " + AUTH_TOK,
+                                "content-type": "application/json",
+                            },
                         )
                         rply.raise_for_status()
                         rslt = rply.json()
-                        print_rslt(argfile, row['uuid'], payload, rslt, show_payload=True)
+                        print_rslt(argfile, row["uuid"], payload, rslt, show_payload=True)
                     except requests.exceptions.HTTPError as excp:
                         LOGGER.error(f"ERROR: {excp}")
             else:
@@ -68,31 +64,31 @@ def main() -> None:
                             is_human = True  # legacy data is all human
                         assaytype_url = get_urls()[0]
                         rply = requests.post(
-                            assaytype_url + 'assaytype',
+                            assaytype_url + "assaytype",
                             data=json.dumps(payload),
                             headers={
-                                'Authorization': 'Bearer ' + AUTH_TOK,
-                                'content-type': 'application/json'
-                            }
+                                "Authorization": "Bearer " + AUTH_TOK,
+                                "content-type": "application/json",
+                            },
                         )
                         rply.raise_for_status()
                         rslt = rply.json()
                         print_rslt(argfile, idx, payload, rslt)
                     except requests.exceptions.HTTPError as excp:
                         LOGGER.error(f"ERROR: {excp}")
-        elif argfile.endswith('.json'):
+        elif argfile.endswith(".json"):
             try:
                 # no good way to determine source_is_human in this case
                 with open(argfile) as jsonfile:
                     payload = json.load(jsonfile)
                 assaytype_url = get_urls()[0]
                 rply = requests.post(
-                    assaytype_url + 'assaytype',
+                    assaytype_url + "assaytype",
                     data=json.dumps(payload),
                     headers={
-                        'Authorization': 'Bearer ' + AUTH_TOK,
-                        'content-type': 'application/json'
-                    }
+                        "Authorization": "Bearer " + AUTH_TOK,
+                        "content-type": "application/json",
+                    },
                 )
                 rply.raise_for_status()
                 rslt = rply.json()
@@ -101,10 +97,9 @@ def main() -> None:
                 LOGGER.error(f"ERROR: {excp}")
                 LOGGER.info("Error was in response to the following JSON:\n" + pformat(payload))
         else:
-            raise RuntimeError(f"Arg file {argfile} is of an"
-                               " unrecognized type")
-    LOGGER.info('done')
+            raise RuntimeError(f"Arg file {argfile} is of an" " unrecognized type")
+    LOGGER.info("done")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

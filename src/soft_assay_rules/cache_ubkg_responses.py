@@ -27,8 +27,8 @@ def main() -> None:
                 save_ubkg_json(ubkg_code, APP_CTX, ubkg_json)
             except requests.exceptions.HTTPError as excp:
                 LOGGER.error(f"ERROR: {excp}")
-    LOGGER.info('done')
+    LOGGER.info("done")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

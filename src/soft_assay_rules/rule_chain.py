@@ -7,8 +7,8 @@ from hubmap_commons.schema_tools import check_json_matches_schema
 
 logger: logging.Logger = logging.getLogger(__name__)
 
-SCHEMA_FILE = 'rule_chain_schema.json'
-SCHEMA_BASE_URI = 'http://schemata.hubmapconsortium.org/'
+SCHEMA_FILE = "rule_chain_schema.json"
+SCHEMA_BASE_URI = "http://schemata.hubmapconsortium.org/"
 
 
 class NoMatchException(Exception):
@@ -24,36 +24,34 @@ class RuleLogicException(Exception):
 
 
 class RuleLoader:
-    def __init__(self, stream, format='yaml'):
+    def __init__(self, stream, format="yaml"):
         self.stream = stream
-        assert format in ['yaml', 'json'], f"unknown format {format}"
+        assert format in ["yaml", "json"], f"unknown format {format}"
         self.format = format
 
     def load(self):
         rule_chain_dict = {}
-        if self.format == 'yaml':
+        if self.format == "yaml":
             json_dict = yaml.safe_load(self.stream)
-        elif self.format == 'json':
+        elif self.format == "json":
             if isinstance(self.stream, str):
                 json_dict = json.loads(self.stream)
             else:
                 json_dict = json.load(self.stream)
         else:
             raise RuntimeError(f"Unknown format {self.format} for input stream")
-        check_json_matches_schema(json_dict,
-                                  SCHEMA_FILE,
-                                  str(Path(__file__).parent),
-                                  SCHEMA_BASE_URI)
+        check_json_matches_schema(
+            json_dict, SCHEMA_FILE, str(Path(__file__).parent), SCHEMA_BASE_URI
+        )
         for key in json_dict:
             rule_chain = RuleChain()
             json_recs = json_dict[key]
             for rec in json_recs:
-                for rule in [rec[key2] for key2 in ['match', 'value']]:
+                for rule in [rec[key2] for key2 in ["match", "value"]]:
                     assert Rule.is_valid(rule), f"Syntax error in rule string {rule}"
                 try:
-                    rule_cls = {'note': NoteRule,
-                                'match': MatchRule}[rec['type'].lower()]
-                    rule_chain.add(rule_cls(rec['match'], rec['value']))
+                    rule_cls = {"note": NoteRule, "match": MatchRule}[rec["type"].lower()]
+                    rule_chain.add(rule_cls(rec["match"], rec["value"]))
                 except KeyError:
                     raise RuleSyntaxException(f"Unknown rule type {rec['type']}")
             rule_chain_dict[key] = rule_chain
@@ -118,7 +116,9 @@ class RuleChain:
                     if isinstance(elt, MatchRule):
                         return self.cleanup(val)
                     elif isinstance(elt, NoteRule):
-                        assert isinstance(val, dict), f"Rule {elt} applied to {rec_dict} did not produce a dict"
+                        assert isinstance(
+                            val, dict
+                        ), f"Rule {elt} applied to {rec_dict} did not produce a dict"
                         ctx.update(val)
                     else:
                         raise NotImplementedError(f"Unknown rule type {type(elt)}")
