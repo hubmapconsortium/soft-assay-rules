@@ -4,28 +4,18 @@ entity-api .  This allows only a subset of functionality since it cannot support
 uuid lookup, but it provides support for CI tests.
 """
 
-import sys
-import requests
 import json
 import logging
+import sys
 from collections.abc import Callable
 from pathlib import Path
-from pprint import pprint, pformat
+from pprint import pformat
+
 import pandas as pd
-
-from source_is_human import source_is_human
-
 from cache_responses import build_cached_json_fname
-
+from rule_chain import NoMatchException, RuleLoader
+from source_is_human import source_is_human
 from test_utils import print_rslt
-
-from rule_chain import (
-    RuleLoader,
-    RuleChain,
-    NoMatchException,
-    RuleSyntaxException,
-    RuleLogicException,
-)
 
 logging.basicConfig(encoding="utf-8")
 LOGGER = logging.getLogger(__name__)
@@ -80,9 +70,9 @@ def lookup_metadata_json(uuid):
     the file.  If no such file is found, ValueError is raised.
     """
     for app_ctx in ["SENNET", "HUBMAP"]:
-        fname = build_cached_json_fname(uuid, app_ctx,
-                                        dir="captured_metadata_json",
-                                        prefix="metadata")
+        fname = build_cached_json_fname(
+            uuid, app_ctx, dir="captured_metadata_json", prefix="metadata"
+        )
         if Path(fname).exists():
             with open(fname) as infile:
                 json_dict = json.load(infile)
@@ -105,9 +95,9 @@ def lookup_rulechain_json(uuid):
     the file.  If no such file is found, ValueError is raised.
     """
     for app_ctx in ["SENNET", "HUBMAP"]:
-        fname = build_cached_json_fname(uuid, app_ctx,
-                                        dir="captured_rulechain_json",
-                                        prefix="rulechain")
+        fname = build_cached_json_fname(
+            uuid, app_ctx, dir="captured_rulechain_json", prefix="rulechain"
+        )
         if Path(fname).exists():
             with open(fname) as infile:
                 json_dict = json.load(infile)
@@ -127,9 +117,9 @@ def lookup_ubkg_json(ubkg_code):
     associated JSON dict if one is found.  Otherwise raise ValueError.
     """
     for app_ctx in ["SENNET", "HUBMAP", "ANY"]:
-        fname = build_cached_json_fname(ubkg_code, app_ctx,
-                                        dir="captured_ubkg_json",
-                                        prefix="ubkg")
+        fname = build_cached_json_fname(
+            ubkg_code, app_ctx, dir="captured_ubkg_json", prefix="ubkg"
+        )
         if Path(fname).exists():
             with open(fname) as infile:
                 json_dict = json.load(infile)
@@ -143,13 +133,11 @@ def wrapped_lookup_ubkg_json(ubkg_code):
     return lookup_ubkg_json(ubkg_code)[1]
 
 
-def calculate_assay_info(metadata: dict,
-                         source_is_human: bool,
-                         lookup_ubkg: Callable[[str], dict]
-                         ) -> dict:
+def calculate_assay_info(
+    metadata: dict, source_is_human: bool, lookup_ubkg: Callable[[str], dict]
+) -> dict:
     # TODO: this function should really get imported from ingest-api
-    if any(elt is None
-           for elt in [pre_rule_chain, body_rule_chain, post_rule_chain]):
+    if any(elt is None for elt in [pre_rule_chain, body_rule_chain, post_rule_chain]):
         initialize_rule_chains()
     for key, value in metadata.items():
         if type(value) is str:
@@ -158,8 +146,7 @@ def calculate_assay_info(metadata: dict,
     try:
         pre_values = pre_rule_chain.apply(metadata)
         body_values = body_rule_chain.apply(metadata, ctx=pre_values)
-        assert "ubkg_code" in body_values, ("Rule matched but lacked ubkg_code:"
-                                            f" {body_values}")
+        assert "ubkg_code" in body_values, "Rule matched but lacked ubkg_code:" f" {body_values}"
         ubkg_values = lookup_ubkg(body_values.get("ubkg_code", "NO_CODE")).get("value", {})
         rslt = post_rule_chain.apply(
             {},
@@ -169,7 +156,7 @@ def calculate_assay_info(metadata: dict,
                 "ubkg_values": ubkg_values,
                 "pre_values": pre_values,
                 # "DEBUG": True
-            }
+            },
         )
         return rslt
     except NoMatchException:
@@ -192,7 +179,7 @@ def smart_equality(val1, val2):
 
 def main() -> None:
     for argfile in sys.argv[1:]:
-        if argfile.endswith('~'):
+        if argfile.endswith("~"):
             LOGGER.info(f"Skipping {argfile}")
             continue  # probably an editor backup file
         if Path(argfile).is_dir():
@@ -200,9 +187,9 @@ def main() -> None:
             continue
         LOGGER.info(f"Reading {argfile}")
         arg_df = None
-        if argfile.endswith('.tsv'):
-            arg_df = pd.read_csv(argfile, sep='\t')
-            if len(arg_df.columns) == 1 and 'uuid' in arg_df.columns:
+        if argfile.endswith(".tsv"):
+            arg_df = pd.read_csv(argfile, sep="\t")
+            if len(arg_df.columns) == 1 and "uuid" in arg_df.columns:
                 for idx, row in arg_df.iterrows():
                     uuid = row["uuid"]
                     app_ctx, json_dict = lookup_entity_json(uuid)
@@ -210,16 +197,17 @@ def main() -> None:
                     is_human = source_is_human([uuid], wrapped_lookup_entity_json)
                     LOGGER.info(f"source_is_human for [{uuid}] returns {is_human}")
                     payload = wrapped_lookup_metadata_json(uuid)
-                    LOGGER.debug(f"PAYLOAD: \n" + pformat(payload))
+                    LOGGER.debug("PAYLOAD: \n" + pformat(payload))
                     cached_rslt = wrapped_lookup_rulechain_json(uuid)
-                    LOGGER.debug(f"EXPECTED RESULT: \n" + pformat(cached_rslt))
+                    LOGGER.debug("EXPECTED RESULT: \n" + pformat(cached_rslt))
                     rslt = calculate_assay_info(payload, is_human, wrapped_lookup_ubkg_json)
                     for elt in rslt:
                         val = rslt[elt]
                         cached_val = cached_rslt.get(elt)
                         if not smart_equality(val, cached_val):
-                            LOGGER.warning(f"DISCORDANT for {uuid} {elt}:"
-                                           f" {val} != {cached_val}")
+                            LOGGER.warning(
+                                f"DISCORDANT for {uuid} {elt}:" f" {val} != {cached_val}"
+                            )
                     print_rslt(argfile, idx, payload, rslt)
             else:
                 for idx, row in arg_df.iterrows():
@@ -235,20 +223,20 @@ def main() -> None:
                         is_human = True  # legacy data is all human
                     rslt = calculate_assay_info(payload, is_human, wrapped_lookup_ubkg_json)
                     print_rslt(argfile, idx, payload, rslt)
-        elif argfile.endswith('.json'):
+        elif argfile.endswith(".json"):
             with open(argfile) as jsonfile:
                 payload = json.load(jsonfile)
                 # This reloaded payload was captured from a valid assayclassifier
                 # version, so the payload should be complete- no added elements
                 # needed.  But we have no way to tell if the source was human,
                 # so assume that it is human.
-                LOGGER.debug(f"RELOADED PAYLOAD: \n" + pformat(payload))
+                LOGGER.debug("RELOADED PAYLOAD: \n" + pformat(payload))
                 rslt = calculate_assay_info(payload, True, wrapped_lookup_ubkg_json)
                 print_rslt(argfile, 0, payload, rslt)
         else:
-            raise RuntimeError(f"Arg file {argfile} is of an"
-                               " unrecognized type")
-    LOGGER.info('done')
+            raise RuntimeError(f"Arg file {argfile} is of an" " unrecognized type")
+    LOGGER.info("done")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

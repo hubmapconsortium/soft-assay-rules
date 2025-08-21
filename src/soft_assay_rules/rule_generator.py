@@ -1,50 +1,59 @@
+import argparse
 import json
-import yaml
 import re
+from collections import defaultdict
 from pathlib import Path
 from pprint import pprint
-from collections import defaultdict
-import argparse
 
-ASSAY_TYPES_YAML = 'src/soft_assay_rules/assay_types.yaml'
+import yaml
 
-INGEST_VALIDATION_TOOLS_PATH = (Path(__file__).parent.parent.parent
-                                / 'submodules' / 'ingest-validation-tools')
-INGEST_VALIDATION_TABLE_PATH = (INGEST_VALIDATION_TOOLS_PATH / 'src' / 'ingest_validation_tools'
-                                / 'table-schemas' / 'assays')
-INGEST_VALIDATION_DIR_SCHEMA_PATH = (INGEST_VALIDATION_TOOLS_PATH / 'src' / 'ingest_validation_tools'
-                                     / 'directory-schemas')
+ASSAY_TYPES_YAML = "src/soft_assay_rules/assay_types.yaml"
 
-SCHEMA_SPLIT_REGEX = r'(.+)-v(\d)'
+INGEST_VALIDATION_TOOLS_PATH = (
+    Path(__file__).parent.parent.parent / "submodules" / "ingest-validation-tools"
+)
+INGEST_VALIDATION_TABLE_PATH = (
+    INGEST_VALIDATION_TOOLS_PATH / "src" / "ingest_validation_tools" / "table-schemas" / "assays"
+)
+INGEST_VALIDATION_DIR_SCHEMA_PATH = (
+    INGEST_VALIDATION_TOOLS_PATH / "src" / "ingest_validation_tools" / "directory-schemas"
+)
 
-CHAIN_OUTPUT_PATH = '/tmp/testing_rule_chain.json'
+SCHEMA_SPLIT_REGEX = r"(.+)-v(\d)"
+
+CHAIN_OUTPUT_PATH = "/tmp/testing_rule_chain.json"
 
 PREAMBLE = [
-    {"type": "note",
-     "match": "metadata_schema_id == null",
-     "value": "{'not_dcwg': true, 'is_dcwg': false}",
-     "rule_description": "Preamble rule identifying DCWG"
-     },
-    {"type": "note",
-     "match": "metadata_schema_id != null",
-     "value": "{'not_dcwg': false, 'is_dcwg': true}",
-     "rule_description": "Preamble rule identifying non-DCWG"
-     },
-    {"type": "note",
-     "match": "not_dcwg and ((assay_type == null and data_types != null) or entity_type == 'Publication')",
-     "value": "{'is_derived': true, 'not_derived': false}",
-     "rule_description": "Preamble rule identifying derived non-DCWG"
-     },
-    {"type": "note",
-     "match": "not_dcwg and is_derived == null",
-     "value": "{'is_derived': false, 'not_derived': true}",
-     "rule_description": "Preamble rule identifying non-derived non-DCWG"
-     },
-    {"type": "note",
-     "match": "not_dcwg and not_derived and version == null",
-     "value": "{'version': 0}",
-     "rule_description": "Cover default schema version = 0 for non-DCWG metadata"
-     },
+    {
+        "type": "note",
+        "match": "metadata_schema_id == null",
+        "value": "{'not_dcwg': true, 'is_dcwg': false}",
+        "rule_description": "Preamble rule identifying DCWG",
+    },
+    {
+        "type": "note",
+        "match": "metadata_schema_id != null",
+        "value": "{'not_dcwg': false, 'is_dcwg': true}",
+        "rule_description": "Preamble rule identifying non-DCWG",
+    },
+    {
+        "type": "note",
+        "match": "not_dcwg and ((assay_type == null and data_types != null) or entity_type == 'Publication')",
+        "value": "{'is_derived': true, 'not_derived': false}",
+        "rule_description": "Preamble rule identifying derived non-DCWG",
+    },
+    {
+        "type": "note",
+        "match": "not_dcwg and is_derived == null",
+        "value": "{'is_derived': false, 'not_derived': true}",
+        "rule_description": "Preamble rule identifying non-derived non-DCWG",
+    },
+    {
+        "type": "note",
+        "match": "not_dcwg and not_derived and version == null",
+        "value": "{'version': 0}",
+        "rule_description": "Cover default schema version = 0 for non-DCWG metadata",
+    },
 ]
 
 
@@ -53,13 +62,13 @@ def get_assay_list(table_schema_path):
         dct = yaml.safe_load(f)
     try:
         assay_lst = []
-        for fld_dct in dct['fields']:
-            if 'name' not in fld_dct:
+        for fld_dct in dct["fields"]:
+            if "name" not in fld_dct:
                 continue
-            if fld_dct['name'] == 'assay_type':
-                assert 'constraints' in fld_dct
-                assert 'enum' in fld_dct['constraints']
-                assay_lst = fld_dct['constraints']['enum'][:]
+            if fld_dct["name"] == "assay_type":
+                assert "constraints" in fld_dct
+                assert "enum" in fld_dct["constraints"]
+                assay_lst = fld_dct["constraints"]["enum"][:]
         if not assay_lst:
             raise RuntimeError("No assay_type list found")
     except Exception as excp:
@@ -89,20 +98,23 @@ def main() -> None:
     schema_name_to_filename_dict = {}
     dir_schema_version_dict = defaultdict(list)
     schema_name_to_name_list_dict = defaultdict(list)
-    for table_schema_path in table_dir_path.glob('*.yaml'):
+    for table_schema_path in table_dir_path.glob("*.yaml"):
         m = split_regex.match(table_schema_path.stem)
         if m:
             schema_name = m.group(1)
             schema_version = int(m.group(2))
             table_schema_version_dict[schema_name].append(schema_version)
         else:
-            raise RuntimeError("Failed to parse schema name from table"
-                               f" schema {table_schema_path.name}")
+            raise RuntimeError(
+                "Failed to parse schema name from table" f" schema {table_schema_path.name}"
+            )
         is_hca = test_is_hca(table_schema_path)
         assay_lst = get_assay_list(table_schema_path)
         for elt in assay_lst:
             name_to_schema_name_dict[(elt.lower(), schema_version, is_hca)] = schema_name
-            schema_name_to_name_list_dict[(schema_name.lower(), schema_version, is_hca)].append(elt)
+            schema_name_to_name_list_dict[(schema_name.lower(), schema_version, is_hca)].append(
+                elt
+            )
             # if elt in name_to_schema_name_dict:
             #     old_schema_name, old_schema_version = name_to_schema_name_dict[elt]
             #     if old_schema_name == schema_name:
@@ -115,7 +127,7 @@ def main() -> None:
             # else:
             #     name_to_schema_name_dict[elt] = (schema_name, schema_version)
     dir_schema_dir_path = Path(INGEST_VALIDATION_DIR_SCHEMA_PATH)
-    for dir_schema_path in dir_schema_dir_path.glob('*.yaml'):
+    for dir_schema_path in dir_schema_dir_path.glob("*.yaml"):
         m = split_regex.match(dir_schema_path.stem)
         if m:
             schema_name = m.group(1)
@@ -123,38 +135,48 @@ def main() -> None:
             dir_schema_version_dict[schema_name].append(schema_version)
             schema_name_to_filename_dict[(schema_name, schema_version)] = str(dir_schema_path.stem)
         else:
-            raise RuntimeError("Failed to parse dir schema name from table"
-                               f" schema {dir_schema_path.name}")
+            raise RuntimeError(
+                "Failed to parse dir schema name from table" f" schema {dir_schema_path.name}"
+            )
 
-    print('----- name_to_schema_name_dict follows ------')
+    print("----- name_to_schema_name_dict follows ------")
     pprint(name_to_schema_name_dict)
-    print('----- table_schema_version_dict follows ------')
+    print("----- table_schema_version_dict follows ------")
     pprint(table_schema_version_dict)
-    print('----- dir_schema_version_dict follows ------')
+    print("----- dir_schema_version_dict follows ------")
     pprint(dir_schema_version_dict)
-    print('----- schema_name_to_filename_dict follows ------')
+    print("----- schema_name_to_filename_dict follows ------")
     pprint(schema_name_to_filename_dict)
-    print('----- schema_name_to_name_list_dict follows -----')
+    print("----- schema_name_to_name_list_dict follows -----")
     pprint(schema_name_to_name_list_dict)
 
     json_block = PREAMBLE
     mapping_failures = []
-    debug_me = ['lc-ms_label-free', 'lc-ms-ms_label-free', 'DART-FISH', 'LC-MS-untargeted', 'Targeted-Shotgun-LC-MS', 'lc-ms-ms_labeled', 'TMT-LC-MS', 'lc-ms_labeled']
+    debug_me = [
+        "lc-ms_label-free",
+        "lc-ms-ms_label-free",
+        "DART-FISH",
+        "LC-MS-untargeted",
+        "Targeted-Shotgun-LC-MS",
+        "lc-ms-ms_labeled",
+        "TMT-LC-MS",
+        "lc-ms_labeled",
+    ]
     for canonical_name in old_assay_types_dict:
         type_dict = old_assay_types_dict[canonical_name]
-        all_assay_types = ([canonical_name]
-                           + [elt for elt in type_dict.get('alt-names', [])
-                              if isinstance(elt, str)])
+        all_assay_types = [canonical_name] + [
+            elt for elt in type_dict.get("alt-names", []) if isinstance(elt, str)
+        ]
         quoted_assay_types = [f"'{tp}'" for tp in all_assay_types]
-        vitessce_hints = type_dict.get('vitessce-hints', [])
-        description = type_dict.get('description', '')
-        is_primary = type_dict['primary']
-        contains_pii = "true" if type_dict.get('contains-pii', "") else "false"
+        vitessce_hints = type_dict.get("vitessce-hints", [])
+        description = type_dict.get("description", "")
+        is_primary = type_dict["primary"]
+        contains_pii = "true" if type_dict.get("contains-pii", "") else "false"
         dataset_type = type_dict.get("dataset-type", "")
 
         # Provide a special hint for datasets to be vis-lifted
-        if 'pyramid' in vitessce_hints or 'publication_ancillary' in all_assay_types:
-            vitessce_hints.append('is_support')
+        if "pyramid" in vitessce_hints or "publication_ancillary" in all_assay_types:
+            vitessce_hints.append("is_support")
 
         if is_primary:
             # Long mechanics follow to figure out what directory schema is appropriate
@@ -208,8 +230,9 @@ def main() -> None:
                     dir_schema_version = dir_schema_version_list[-2]
                 else:
                     dir_schema_version = dir_schema_version_list[0]
-                dir_schema_filename = schema_name_to_filename_dict[(schema_assay_name,
-                                                                    dir_schema_version)]
+                dir_schema_filename = schema_name_to_filename_dict[
+                    (schema_assay_name, dir_schema_version)
+                ]
             print(f"  -> {dir_schema_filename}")
             # At last we have a directory schema
 
@@ -222,288 +245,495 @@ def main() -> None:
             else:
                 tbl_schema_str = ""
             json_block.append(
-                {"type": "match",
-                 "match": f"not_dcwg and not_derived and assay_type in [{', '.join(quoted_assay_types)}]",
-                 "value": (f"{{'assaytype': '{canonical_name}',"
-                           f" {dir_schema_str}"
-                           f" {tbl_schema_str}"
-                           f" 'vitessce-hints': {vitessce_hints},"
-                           f" 'contains-pii': {contains_pii},"
-                           f" 'primary': true,"
-                           f" 'description': '{description}',"
-                           f" 'dataset-type': '{dataset_type}' }}"
-                           ),
-                 "rule_description": f"non-DCWG primary {canonical_name}"
-                 }
+                {
+                    "type": "match",
+                    "match": f"not_dcwg and not_derived and assay_type in [{', '.join(quoted_assay_types)}]",
+                    "value": (
+                        f"{{'assaytype': '{canonical_name}',"
+                        f" {dir_schema_str}"
+                        f" {tbl_schema_str}"
+                        f" 'vitessce-hints': {vitessce_hints},"
+                        f" 'contains-pii': {contains_pii},"
+                        f" 'primary': true,"
+                        f" 'description': '{description}',"
+                        f" 'dataset-type': '{dataset_type}' }}"
+                    ),
+                    "rule_description": f"non-DCWG primary {canonical_name}",
+                }
             )
         else:
             json_block.append(
-                {"type": "match",
-                 "match": f"not_dcwg and is_derived and data_types[0] in [{', '.join(quoted_assay_types)}]",
-                 "value": (f"{{'assaytype': '{canonical_name}',"
-                           f" 'vitessce-hints': {vitessce_hints},"
-                           f" 'primary': false,"
-                           f" 'contains-pii': {contains_pii},"
-                           f" 'description': '{description}'}}"
-                           ),
-                 "rule_description": f"non-DCWG derived {canonical_name}"
-                 }
+                {
+                    "type": "match",
+                    "match": f"not_dcwg and is_derived and data_types[0] in [{', '.join(quoted_assay_types)}]",
+                    "value": (
+                        f"{{'assaytype': '{canonical_name}',"
+                        f" 'vitessce-hints': {vitessce_hints},"
+                        f" 'primary': false,"
+                        f" 'contains-pii': {contains_pii},"
+                        f" 'description': '{description}'}}"
+                    ),
+                    "rule_description": f"non-DCWG derived {canonical_name}",
+                }
             )
     mapping_failures = list(set(mapping_failures))
     print(f"MAPPING FAILURES: {mapping_failures}")
 
     # Visium v3 (current CEDAR template)
     for data_type, assay, description, must_contain, schema in [
-            ('Visium (no probes)', 'visium-no-probes', 'Visium (No probes)',
-             ['Histology', 'RNAseq'], 'visium-no-probes-v2'),
-            ('Visium (with probes)', 'visium-with-probes', 'Visium (With probes)',
-             ['Histology', 'RNAseq (with probes)'], 'visium-with-probes-v2'),
+        (
+            "Visium (no probes)",
+            "visium-no-probes",
+            "Visium (No probes)",
+            ["Histology", "RNAseq"],
+            "visium-no-probes-v2",
+        ),
+        (
+            "Visium (with probes)",
+            "visium-with-probes",
+            "Visium (With probes)",
+            ["Histology", "RNAseq (with probes)"],
+            "visium-with-probes-v2",
+        ),
     ]:
-        must_contain_str = ','.join(["'" + elt + "'" for elt in must_contain])
+        must_contain_str = ",".join(["'" + elt + "'" for elt in must_contain])
         json_block.append(
-            {"type": "match",
-             "match": (f"is_dcwg and dataset_type == '{data_type}'"
-                       ),
-             "value": ("{"
-                       f"'assaytype': '{assay}',"
-                       " 'vitessce-hints': [],"
-                       f" 'dir-schema': '{schema}',"
-                       f" 'description': '{description}',"
-                       f" 'contains-pii': true,"
-                       f" 'primary': true,"
-                       f" 'dataset-type': '{data_type}',"
-                       f" 'must-contain': [{must_contain_str}],"
-                       f" 'is-multi-assay': true"
-                       "}"
-                       ),
-             "rule_description": f"DCWG {assay}"
-             }
+            {
+                "type": "match",
+                "match": (f"is_dcwg and dataset_type == '{data_type}'"),
+                "value": (
+                    "{"
+                    f"'assaytype': '{assay}',"
+                    " 'vitessce-hints': [],"
+                    f" 'dir-schema': '{schema}',"
+                    f" 'description': '{description}',"
+                    f" 'contains-pii': true,"
+                    f" 'primary': true,"
+                    f" 'dataset-type': '{data_type}',"
+                    f" 'must-contain': [{must_contain_str}],"
+                    f" 'is-multi-assay': true"
+                    "}"
+                ),
+                "rule_description": f"DCWG {assay}",
+            }
         )
-
 
     # GeoMx
     for data_type, must_contain, assay, description, schema in [
-        ('GeoMx (NGS)', ['RNAseq'], 'geomx_ngs?', 'GeoMx (NGS)', 'geomx-ngs-v2')
+        ("GeoMx (NGS)", ["RNAseq"], "geomx_ngs?", "GeoMx (NGS)", "geomx-ngs-v2")
     ]:
-        must_contain_str = ','.join(["'" + elt + "'" for elt in must_contain])
+        must_contain_str = ",".join(["'" + elt + "'" for elt in must_contain])
         json_block.append(
-            {"type": "match",
-             "match": (f"is_dcwg and dataset_type == '{data_type}'"),
-             "value": ("{"
-                       f"'assaytype': '{assay}',"
-                       " 'vitessce-hints': [],"
-                       f" 'dir-schema': '{schema}',"
-                       f" 'description': '{description}',"
-                       f" 'contains-pii': true,"
-                       f" 'primary': true,"
-                       f" 'dataset-type': '{data_type}',"
-                       f" 'must-contain': [{must_contain_str}],"
-                       f" 'is-multi-assay': true"
-                       "}"
-                       ),
-             "rule_description": f"DCWG {assay}"
-             }
+            {
+                "type": "match",
+                "match": (f"is_dcwg and dataset_type == '{data_type}'"),
+                "value": (
+                    "{"
+                    f"'assaytype': '{assay}',"
+                    " 'vitessce-hints': [],"
+                    f" 'dir-schema': '{schema}',"
+                    f" 'description': '{description}',"
+                    f" 'contains-pii': true,"
+                    f" 'primary': true,"
+                    f" 'dataset-type': '{data_type}',"
+                    f" 'must-contain': [{must_contain_str}],"
+                    f" 'is-multi-assay': true"
+                    "}"
+                ),
+                "rule_description": f"DCWG {assay}",
+            }
         )
 
     # Multiome
     for data_type, must_contain, assay, description, schema in [
-            ('10X Multiome', ['RNAseq', 'ATACseq'], '10x-multiome', '10X Multiome', '10x-multiome-v2'),
-            ('SNARE-seq2', ['RNAseq', 'ATACseq'], 'multiome-snare-seq2', 'SNARE-seq2', 'snareseq2-v2'),
+        ("10X Multiome", ["RNAseq", "ATACseq"], "10x-multiome", "10X Multiome", "10x-multiome-v2"),
+        ("SNARE-seq2", ["RNAseq", "ATACseq"], "multiome-snare-seq2", "SNARE-seq2", "snareseq2-v2"),
     ]:
-        must_contain_str = ','.join(["'" + elt + "'" for elt in must_contain])
+        must_contain_str = ",".join(["'" + elt + "'" for elt in must_contain])
         json_block.append(
-            {"type": "match",
-             "match": (f"is_dcwg and dataset_type == '{data_type}'"),
-             "value": ("{"
-                       f"'assaytype': '{assay}',"
-                       " 'vitessce-hints': [],"
-                       f" 'dir-schema': '{schema}',"
-                       f" 'description': '{description}',"
-                       f" 'contains-pii': true,"
-                       f" 'primary': true,"
-                       f" 'dataset-type': '{data_type}',"
-                       f" 'must-contain': [{must_contain_str}],"
-                       f" 'is-multi-assay': true"
-                       "}"
-                       ),
-             "rule_description": f"DCWG {assay}"
-             }
+            {
+                "type": "match",
+                "match": (f"is_dcwg and dataset_type == '{data_type}'"),
+                "value": (
+                    "{"
+                    f"'assaytype': '{assay}',"
+                    " 'vitessce-hints': [],"
+                    f" 'dir-schema': '{schema}',"
+                    f" 'description': '{description}',"
+                    f" 'contains-pii': true,"
+                    f" 'primary': true,"
+                    f" 'dataset-type': '{data_type}',"
+                    f" 'must-contain': [{must_contain_str}],"
+                    f" 'is-multi-assay': true"
+                    "}"
+                ),
+                "rule_description": f"DCWG {assay}",
+            }
         )
 
     # RNAseq and some ATACseq
-    visium_with_probes_str = "10x Genomics; Visium Human Transcriptome Probe Kit v2 - Small; PN 1000466"
-    for data_type, oligo_probe_panel, entity, barcode_read, barcode_size, barcode_offset, umi_read, umi_size, umi_offset, assay, description, schema in [
-            ('RNAseq', None, 'single cell', 'Not applicable', 40, "'Not applicable'", 'Not applicable', 8, "'Not applicable'",
-             'sciRNAseq', 'sciRNA-seq', 'rnaseq-v2'),
-            ('RNAseq', None, 'single nucleus', 'Read 2', "'8,8,8'", "'10,48,86'", 'Read 2', 10, 0, 'SNARE-RNAseq2', 'snRNAseq (SNARE-seq2)', 'rnaseq-v2'),
-            ('RNAseq', None, 'spot', 'Read 1', 16, 0, 'Read 1', 12, 16, 'scRNAseq-10Genomics-v3', 'scRNA-seq (10x Genomics v3)', 'rnaseq-v2'),
-            ('RNAseq (with probes)', visium_with_probes_str, 'spot', 'Read 1', 16, 0, 'Read 1', 12, 16, 'scRNAseq-visium-with-probes', 'Visium RNAseq with probes', 'rnaseq-with-probes-v2'),
-            ('RNAseq', None, 'single cell', 'Read 1', 16, 0, 'Read 1', 10, 16, 'scRNAseq-10xGenomics-v2', 'scRNA-seq (10x Genomics v2)', 'rnaseq-v2'),
-            ('RNAseq', None, 'single nucleus', 'Read 1', 16, 0, 'Read 1', 10, 16, 'snRNAseq-10xGenomics-v2', 'snRNA-seq (10x Genomics v2)', 'rnaseq-v2'),
-            ('RNAseq', None, 'single cell', 'Read 1', 16, 0, 'Read 1', 12, 16, 'scRNAseq-10xGenomics-v3', 'scRNA-seq (10x Genomics v3)', 'rnaseq-v2'),
-            ('RNAseq', None, 'single nucleus', 'Read 1', 16, 0, 'Read 1', 12, 16, 'snRNAseq-10xGenomics-v3', 'snRNA-seq (10x Genomics v3)', 'rnaseq-v2'),
-            ('ATACseq', None, 'single nucleus', 'Read 2', 16, 0, 'Not applicable', "'Not applicable'", "'Not applicable'", 'snATACseq', 'snATAC-seq', 'atacseq-v2'),
-            ('ATACseq', None, 'single nucleus', 'Read 2', "'8,8,8'", "'0,38,76'", 'Not applicable', "'Not applicable'", "'Not applicable'", 'SNARE-ATACseq2', 'snATACseq (SNARE-seq2)', 'atacseq-v2'),
-            ('ATACseq', None, 'single nucleus', 'Read 2', 16, 8, 'Not applicable', "'Not applicable'", "'Not applicable'", 'sn_atac_seq?', 'snATACseq-multiome', 'atacseq-v2'),
+    visium_with_probes_str = (
+        "10x Genomics; Visium Human Transcriptome Probe Kit v2 - Small; PN 1000466"
+    )
+    for (
+        data_type,
+        oligo_probe_panel,
+        entity,
+        barcode_read,
+        barcode_size,
+        barcode_offset,
+        umi_read,
+        umi_size,
+        umi_offset,
+        assay,
+        description,
+        schema,
+    ) in [
+        (
+            "RNAseq",
+            None,
+            "single cell",
+            "Not applicable",
+            40,
+            "'Not applicable'",
+            "Not applicable",
+            8,
+            "'Not applicable'",
+            "sciRNAseq",
+            "sciRNA-seq",
+            "rnaseq-v2",
+        ),
+        (
+            "RNAseq",
+            None,
+            "single nucleus",
+            "Read 2",
+            "'8,8,8'",
+            "'10,48,86'",
+            "Read 2",
+            10,
+            0,
+            "SNARE-RNAseq2",
+            "snRNAseq (SNARE-seq2)",
+            "rnaseq-v2",
+        ),
+        (
+            "RNAseq",
+            None,
+            "spot",
+            "Read 1",
+            16,
+            0,
+            "Read 1",
+            12,
+            16,
+            "scRNAseq-10Genomics-v3",
+            "scRNA-seq (10x Genomics v3)",
+            "rnaseq-v2",
+        ),
+        (
+            "RNAseq (with probes)",
+            visium_with_probes_str,
+            "spot",
+            "Read 1",
+            16,
+            0,
+            "Read 1",
+            12,
+            16,
+            "scRNAseq-visium-with-probes",
+            "Visium RNAseq with probes",
+            "rnaseq-with-probes-v2",
+        ),
+        (
+            "RNAseq",
+            None,
+            "single cell",
+            "Read 1",
+            16,
+            0,
+            "Read 1",
+            10,
+            16,
+            "scRNAseq-10xGenomics-v2",
+            "scRNA-seq (10x Genomics v2)",
+            "rnaseq-v2",
+        ),
+        (
+            "RNAseq",
+            None,
+            "single nucleus",
+            "Read 1",
+            16,
+            0,
+            "Read 1",
+            10,
+            16,
+            "snRNAseq-10xGenomics-v2",
+            "snRNA-seq (10x Genomics v2)",
+            "rnaseq-v2",
+        ),
+        (
+            "RNAseq",
+            None,
+            "single cell",
+            "Read 1",
+            16,
+            0,
+            "Read 1",
+            12,
+            16,
+            "scRNAseq-10xGenomics-v3",
+            "scRNA-seq (10x Genomics v3)",
+            "rnaseq-v2",
+        ),
+        (
+            "RNAseq",
+            None,
+            "single nucleus",
+            "Read 1",
+            16,
+            0,
+            "Read 1",
+            12,
+            16,
+            "snRNAseq-10xGenomics-v3",
+            "snRNA-seq (10x Genomics v3)",
+            "rnaseq-v2",
+        ),
+        (
+            "ATACseq",
+            None,
+            "single nucleus",
+            "Read 2",
+            16,
+            0,
+            "Not applicable",
+            "'Not applicable'",
+            "'Not applicable'",
+            "snATACseq",
+            "snATAC-seq",
+            "atacseq-v2",
+        ),
+        (
+            "ATACseq",
+            None,
+            "single nucleus",
+            "Read 2",
+            "'8,8,8'",
+            "'0,38,76'",
+            "Not applicable",
+            "'Not applicable'",
+            "'Not applicable'",
+            "SNARE-ATACseq2",
+            "snATACseq (SNARE-seq2)",
+            "atacseq-v2",
+        ),
+        (
+            "ATACseq",
+            None,
+            "single nucleus",
+            "Read 2",
+            16,
+            8,
+            "Not applicable",
+            "'Not applicable'",
+            "'Not applicable'",
+            "sn_atac_seq?",
+            "snATACseq-multiome",
+            "atacseq-v2",
+        ),
     ]:
         if oligo_probe_panel:
             probe_panel_str = f"and oligo_probe_panel == '{oligo_probe_panel}'"
         else:
-            probe_panel_str = ''
+            probe_panel_str = ""
         json_block.append(
-            {"type": "match",
-             "match": (f"is_dcwg and dataset_type == '{data_type}'"
-                       f" {probe_panel_str}"
-                       f" and assay_input_entity == '{entity}'"
-                       f" and barcode_read =~~ '{barcode_read}'"
-                       f" and barcode_size == {barcode_size}"
-                       f" and barcode_offset == {barcode_offset}"
-                       f" and umi_read =~~ '{umi_read}'"
-                       f" and umi_size == {umi_size}"
-                       f" and umi_offset == {umi_offset}"
-                       ),
-             "value": ("{"
-                       f"'assaytype': '{assay}',"
-                       " 'vitessce-hints': [],"
-                       f" 'dir-schema': '{schema}',"
-                       f" 'contains-pii': true,"
-                       f" 'primary': true,"
-                       f" 'dataset-type': '{data_type}',"
-                       f" 'description': '{description}'"
-                       "}"
-                       ),
-             "rule_description": f"DCWG {assay}"
-             }
+            {
+                "type": "match",
+                "match": (
+                    f"is_dcwg and dataset_type == '{data_type}'"
+                    f" {probe_panel_str}"
+                    f" and assay_input_entity == '{entity}'"
+                    f" and barcode_read =~~ '{barcode_read}'"
+                    f" and barcode_size == {barcode_size}"
+                    f" and barcode_offset == {barcode_offset}"
+                    f" and umi_read =~~ '{umi_read}'"
+                    f" and umi_size == {umi_size}"
+                    f" and umi_offset == {umi_offset}"
+                ),
+                "value": (
+                    "{"
+                    f"'assaytype': '{assay}',"
+                    " 'vitessce-hints': [],"
+                    f" 'dir-schema': '{schema}',"
+                    f" 'contains-pii': true,"
+                    f" 'primary': true,"
+                    f" 'dataset-type': '{data_type}',"
+                    f" 'description': '{description}'"
+                    "}"
+                ),
+                "rule_description": f"DCWG {assay}",
+            }
         )
 
     # bulk ATACseq and RNAseq
     for data_type, entity, assay, description, schema in [
-            ('RNAseq', 'tissue (bulk)', 'bulk-RNA', 'Bulk RNA-seq', 'rnaseq-v2'),
-            ('ATACseq', 'tissue (bulk)', 'ATACseq-bulk', 'Bulk ATAC-seq', 'atacseq-v2'),
+        ("RNAseq", "tissue (bulk)", "bulk-RNA", "Bulk RNA-seq", "rnaseq-v2"),
+        ("ATACseq", "tissue (bulk)", "ATACseq-bulk", "Bulk ATAC-seq", "atacseq-v2"),
     ]:
         json_block.append(
-            {"type": "match",
-             "match": (f"is_dcwg and dataset_type == '{data_type}'"
-                       f" and assay_input_entity == '{entity}'"
-                       ),
-             "value": ("{"
-                       f"'assaytype': '{assay}',"
-                       " 'vitessce-hints': [],"
-                       f" 'dir-schema': '{schema}',"
-                       f" 'contains-pii': true,"
-                       f" 'primary': true,"
-                       f" 'dataset-type': '{data_type}',"
-                       f" 'description': '{description}'"
-                       "}"
-                       ),
-             "rule_description": f"DCWG {assay}"
-             }
+            {
+                "type": "match",
+                "match": (
+                    f"is_dcwg and dataset_type == '{data_type}'"
+                    f" and assay_input_entity == '{entity}'"
+                ),
+                "value": (
+                    "{"
+                    f"'assaytype': '{assay}',"
+                    " 'vitessce-hints': [],"
+                    f" 'dir-schema': '{schema}',"
+                    f" 'contains-pii': true,"
+                    f" 'primary': true,"
+                    f" 'dataset-type': '{data_type}',"
+                    f" 'description': '{description}'"
+                    "}"
+                ),
+                "rule_description": f"DCWG {assay}",
+            }
         )
 
     # sciATAC special case
     json_block.append(
-        {"type": "match",
-         "match": (f"is_dcwg and dataset_type == 'ATACseq'"
-                   f" and assay_input_entity == 'single cell'"
-                   f" and barcode_read =~~ 'Not applicable'"
-                   ),
-         "value": ("{"
-                   f"'assaytype': 'sciATACseq',"
-                   " 'vitessce-hints': [],"
-                   " 'dir-schema': 'atacseq-v2',"
-                   f" 'contains-pii': true,"
-                   f" 'primary': true,"
-                   f" 'dataset-type': 'ATACseq',"
-                   f" 'description': 'sciATAC-seq'"
-                   "}"
-                   ),
-         "rule_description": f"DCWG sciATACseq"
-         }
+        {
+            "type": "match",
+            "match": (
+                "is_dcwg and dataset_type == 'ATACseq'"
+                " and assay_input_entity == 'single cell'"
+                " and barcode_read =~~ 'Not applicable'"
+            ),
+            "value": (
+                "{"
+                "'assaytype': 'sciATACseq',"
+                " 'vitessce-hints': [],"
+                " 'dir-schema': 'atacseq-v2',"
+                " 'contains-pii': true,"
+                " 'primary': true,"
+                " 'dataset-type': 'ATACseq',"
+                " 'description': 'sciATAC-seq'"
+                "}"
+            ),
+            "rule_description": "DCWG sciATACseq",
+        }
     )
 
     # Histology assays
     for stain_name, assay, description, schema in [
-            ('PAS', 'PAS', 'PAS Stained Microscopy', 'histology-v2'),
-            ('H&E', 'h-and-e', 'H&E Stained Microscopy', 'histology-v2'),
+        ("PAS", "PAS", "PAS Stained Microscopy", "histology-v2"),
+        ("H&E", "h-and-e", "H&E Stained Microscopy", "histology-v2"),
     ]:
         json_block.append(
-            {"type": "match",
-             "match": (f"is_dcwg and dataset_type == 'Histology' "
-                       f" and stain_name == '{stain_name}'"
-                       ),
-             "value": ("{"
-                       f"'assaytype': '{assay}',"
-                       " 'vitessce-hints': [],"
-                       f" 'dir-schema': '{schema}',"
-                       f" 'contains-pii': false,"
-                       f" 'primary': true,"
-                       f" 'dataset-type': 'Histology',"
-                       f" 'description': '{description}'"
-                       "}"
-                       ),
-             "rule_description": f"DCWG {assay}"
-             }
+            {
+                "type": "match",
+                "match": (
+                    f"is_dcwg and dataset_type == 'Histology' "
+                    f" and stain_name == '{stain_name}'"
+                ),
+                "value": (
+                    "{"
+                    f"'assaytype': '{assay}',"
+                    " 'vitessce-hints': [],"
+                    f" 'dir-schema': '{schema}',"
+                    f" 'contains-pii': false,"
+                    f" 'primary': true,"
+                    f" 'dataset-type': 'Histology',"
+                    f" 'description': '{description}'"
+                    "}"
+                ),
+                "rule_description": f"DCWG {assay}",
+            }
         )
 
     # Simple assays
     for data_type, assay, description, schema in [
-            ('CODEX', 'CODEX', 'CODEX', 'codex-v2'),
-            ('PhenoCycler', 'phenocycler', 'PhenoCycler', 'phenocycler-v2'),
-            ('CycIF', 'cycif', 'CycIF', 'cycif-v2'),
-            ('MERFISH', 'merfish', 'MERFISH', 'merfish-v2'),
-            ('Cell Dive', 'cell-dive', 'Cell DIVE', 'celldive-v2'),
-            ('MALDI', 'MALDI-IMS', 'MALDI IMS', 'maldi-v2'),
-            ('SIMS', 'SIMS-IMS', 'SIMS-IMS', 'sims-v2'),
-            ('DESI', 'DESI-IMS', 'DESI', 'desi-v2'),
-            ('MIBI', 'MIBI', 'Multiplex Ion Beam Imaging', 'mibi-v2'),
-            ('2D Imaging Mass Cytometry', 'IMC2D', 'Imaging Mass Cytometry (2D)', 'imc-v2'),
-            ('LC-MS', 'LC-MS', 'LC-MS', 'lcms-v2'),
-            ('nanoSPLITS', 'nano-splits', 'nanoSPLITS', 'nano-splits-v2'),
-            ('Auto-fluorescence', 'AF', 'Autofluorescence Microscopy', 'af-v2'),
-            ('Light Sheet', 'Lightsheet', 'Lightsheet Microsopy', 'lightsheet-v2'),
-            ('Confocal', 'confocal', 'Confocal Microscopy', 'confocal-v2'),
-            ('Thick section Multiphoton MxIF', 'thick-section-multiphoton-mxif', 'Thick section Multiphoton MxIF', 'thick-section-multiphoton-mxif-v2'),
-            ('Second Harmonic Generation (SHG)', 'second-harmonic-generation', 'Second Harmonic Generation (SHG)', 'second-harmonic-generation-v2'),
-            ('Enhanced Stimulated Raman Spectroscopy (SRS)', 'enhanced-srs', 'Enhanced Stimulated Raman Spectroscopy (SRS)', 'enhanced-srs-v2'),
-            ('Molecular Cartography', 'molecular-cartography', 'Molecular Cartography', 'mc-v2'),
+        ("CODEX", "CODEX", "CODEX", "codex-v2"),
+        ("PhenoCycler", "phenocycler", "PhenoCycler", "phenocycler-v2"),
+        ("CycIF", "cycif", "CycIF", "cycif-v2"),
+        ("MERFISH", "merfish", "MERFISH", "merfish-v2"),
+        ("Cell Dive", "cell-dive", "Cell DIVE", "celldive-v2"),
+        ("MALDI", "MALDI-IMS", "MALDI IMS", "maldi-v2"),
+        ("SIMS", "SIMS-IMS", "SIMS-IMS", "sims-v2"),
+        ("DESI", "DESI-IMS", "DESI", "desi-v2"),
+        ("MIBI", "MIBI", "Multiplex Ion Beam Imaging", "mibi-v2"),
+        ("2D Imaging Mass Cytometry", "IMC2D", "Imaging Mass Cytometry (2D)", "imc-v2"),
+        ("LC-MS", "LC-MS", "LC-MS", "lcms-v2"),
+        ("nanoSPLITS", "nano-splits", "nanoSPLITS", "nano-splits-v2"),
+        ("Auto-fluorescence", "AF", "Autofluorescence Microscopy", "af-v2"),
+        ("Light Sheet", "Lightsheet", "Lightsheet Microsopy", "lightsheet-v2"),
+        ("Confocal", "confocal", "Confocal Microscopy", "confocal-v2"),
+        (
+            "Thick section Multiphoton MxIF",
+            "thick-section-multiphoton-mxif",
+            "Thick section Multiphoton MxIF",
+            "thick-section-multiphoton-mxif-v2",
+        ),
+        (
+            "Second Harmonic Generation (SHG)",
+            "second-harmonic-generation",
+            "Second Harmonic Generation (SHG)",
+            "second-harmonic-generation-v2",
+        ),
+        (
+            "Enhanced Stimulated Raman Spectroscopy (SRS)",
+            "enhanced-srs",
+            "Enhanced Stimulated Raman Spectroscopy (SRS)",
+            "enhanced-srs-v2",
+        ),
+        ("Molecular Cartography", "molecular-cartography", "Molecular Cartography", "mc-v2"),
     ]:
         json_block.append(
-            {"type": "match",
-             "match": (f"is_dcwg and dataset_type == '{data_type}'"
-                       ),
-             "value": ("{"
-                       f"'assaytype': '{assay}',"
-                       " 'vitessce-hints': [],"
-                       f" 'dir-schema': '{schema}',"
-                       f" 'contains-pii': false,"
-                       f" 'primary': true,"
-                       f" 'dataset-type': '{data_type}',"
-                       f" 'description': '{description}'"
-                       "}"
-                       ),
-             "rule_description": f"DCWG {assay}"
-             }
+            {
+                "type": "match",
+                "match": (f"is_dcwg and dataset_type == '{data_type}'"),
+                "value": (
+                    "{"
+                    f"'assaytype': '{assay}',"
+                    " 'vitessce-hints': [],"
+                    f" 'dir-schema': '{schema}',"
+                    f" 'contains-pii': false,"
+                    f" 'primary': true,"
+                    f" 'dataset-type': '{data_type}',"
+                    f" 'description': '{description}'"
+                    "}"
+                ),
+                "rule_description": f"DCWG {assay}",
+            }
         )
 
-    with open(CHAIN_OUTPUT_PATH, 'w') as ofile:
+    with open(CHAIN_OUTPUT_PATH, "w") as ofile:
         json.dump(json_block, ofile, indent=4)
 
-    print('done')
+    print("done")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate a complete new rule chain")
-    parser.add_argument("--force", action="store_true",
-                        help=("Mods to the rule chain are now made by directly editing"
-                              " the testing_rule_chain.json file.  If you want to"
-                              " recreate that file from scratch, run this program"
-                              " with the '--force' option.  The newly created chain"
-                              f" will be written to {CHAIN_OUTPUT_PATH} , and you"
-                              " will need to recreate any edits that have been added"
-                              " to the current rule chain file."))
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help=(
+            "Mods to the rule chain are now made by directly editing"
+            " the testing_rule_chain.json file.  If you want to"
+            " recreate that file from scratch, run this program"
+            " with the '--force' option.  The newly created chain"
+            f" will be written to {CHAIN_OUTPUT_PATH} , and you"
+            " will need to recreate any edits that have been added"
+            " to the current rule chain file."
+        ),
+    )
     args = parser.parse_args()
     if args.force:
         main()
     else:
         parser.print_help()
-

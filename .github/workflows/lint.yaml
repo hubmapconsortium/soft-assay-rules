@@ -1,19 +1,37 @@
-name: Lint
+name: Linters
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
-
-    # Available versions:
-    # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
-    runs-on: ubuntu-20.04
-
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.11"]
     steps:
-    - uses: actions/checkout@v2
-      # with:
-      #   submodules: 'recursive'
+      - uses: actions/checkout@v4
 
-    # TODO: setup environment
-    # TODO: install dependencies
-    # TODO: run linting
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        uses: py-actions/py-dependency-install@v4
+        with:
+          path: "src/requirements-dev.txt"
+
+      - name: Flake8 Lint
+        run: |
+          flake8 --ignore=E501,W503,E203 src
+
+      - name: Black Lint
+        run: |
+          black --line-length 99 --check --verbose src
+
+      - name: isort Lint
+        run: |
+          isort --profile black --check-only --diff src
