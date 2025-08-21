@@ -1,9 +1,9 @@
-import sys
-import requests
 import logging
+import sys
 from os import environ
 from pprint import pformat
 
+import requests
 from cache_responses import get_ubkg_json, save_ubkg_json
 
 logging.basicConfig(encoding="utf-8", level=logging.INFO)

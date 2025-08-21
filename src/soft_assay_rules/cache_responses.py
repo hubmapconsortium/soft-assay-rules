@@ -1,12 +1,11 @@
-import sys
-import requests
 import json
 import logging
-from pathlib import Path
+import sys
 from os import environ
+from pathlib import Path
 
+import requests
 from source_is_human import source_is_human
-
 from test_utils import print_rslt
 
 logging.basicConfig(encoding="utf-8", level=logging.INFO)

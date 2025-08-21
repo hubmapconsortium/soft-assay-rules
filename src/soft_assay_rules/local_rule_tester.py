@@ -4,24 +4,18 @@ entity-api .  This allows only a subset of functionality since it cannot support
 uuid lookup, but it provides support for CI tests.
 """
 
-import sys
 import json
 import logging
+import sys
 from collections.abc import Callable
 from pathlib import Path
 from pprint import pformat
+
 import pandas as pd
-
-from source_is_human import source_is_human
-
 from cache_responses import build_cached_json_fname
-
+from rule_chain import NoMatchException, RuleLoader
+from source_is_human import source_is_human
 from test_utils import print_rslt
-
-from rule_chain import (
-    RuleLoader,
-    NoMatchException,
-)
 
 logging.basicConfig(encoding="utf-8")
 LOGGER = logging.getLogger(__name__)

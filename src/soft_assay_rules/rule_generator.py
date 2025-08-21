@@ -1,10 +1,11 @@
+import argparse
 import json
-import yaml
 import re
+from collections import defaultdict
 from pathlib import Path
 from pprint import pprint
-from collections import defaultdict
-import argparse
+
+import yaml
 
 ASSAY_TYPES_YAML = "src/soft_assay_rules/assay_types.yaml"
 

@@ -1,9 +1,10 @@
-import logging
-import yaml
 import json
+import logging
 from pathlib import Path
-from rule_engine import Rule, EngineError, Context
+
+import yaml
 from hubmap_commons.schema_tools import check_json_matches_schema
+from rule_engine import Context, EngineError, Rule
 
 logger: logging.Logger = logging.getLogger(__name__)
 

@@ -1,15 +1,15 @@
-import sys
-import requests
 import json
 import logging
-from os.path import isdir
+import sys
 from os import environ
+from os.path import isdir
 from pprint import pformat
-import pandas as pd
 
+import pandas as pd
+import requests
+from cache_responses import get_entity_json, get_metadata_json, get_urls
 from source_is_human import source_is_human
 from test_utils import print_rslt
-from cache_responses import get_entity_json, get_metadata_json, get_urls
 
 AUTH_TOK = environ["AUTH_TOK"]
 APP_CTX = environ["APP_CTX"]
