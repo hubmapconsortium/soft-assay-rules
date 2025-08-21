@@ -280,7 +280,6 @@ def main() -> None:
              }
         )
 
-
     # GeoMx
     for data_type, must_contain, assay, description, schema in [
         ('GeoMx (NGS)', ['RNAseq'], 'geomx_ngs?', 'GeoMx (NGS)', 'geomx-ngs-v2')
@@ -403,21 +402,21 @@ def main() -> None:
     # sciATAC special case
     json_block.append(
         {"type": "match",
-         "match": (f"is_dcwg and dataset_type == 'ATACseq'"
-                   f" and assay_input_entity == 'single cell'"
-                   f" and barcode_read =~~ 'Not applicable'"
+         "match": ("is_dcwg and dataset_type == 'ATACseq'"
+                   " and assay_input_entity == 'single cell'"
+                   " and barcode_read =~~ 'Not applicable'"
                    ),
          "value": ("{"
-                   f"'assaytype': 'sciATACseq',"
+                   "'assaytype': 'sciATACseq',"
                    " 'vitessce-hints': [],"
                    " 'dir-schema': 'atacseq-v2',"
-                   f" 'contains-pii': true,"
-                   f" 'primary': true,"
-                   f" 'dataset-type': 'ATACseq',"
-                   f" 'description': 'sciATAC-seq'"
+                   " 'contains-pii': true,"
+                   " 'primary': true,"
+                   " 'dataset-type': 'ATACseq',"
+                   " 'description': 'sciATAC-seq'"
                    "}"
                    ),
-         "rule_description": f"DCWG sciATACseq"
+         "rule_description": "DCWG sciATACseq"
          }
     )
 
@@ -506,4 +505,3 @@ if __name__ == '__main__':
         main()
     else:
         parser.print_help()
-

@@ -1,28 +1,22 @@
 import sys
 import requests
 import json
-import yaml
-import re
 import logging
-from os.path import isdir, dirname, join
+from os.path import isdir
 from os import environ
 from pprint import pformat
 import pandas as pd
 
-from hubmap_commons.exceptions import HTTPException
-from werkzeug.exceptions import HTTPException as WerkzeugException
-
 from source_is_human import source_is_human
 from test_utils import print_rslt
-
-AUTH_TOK = environ['AUTH_TOK']
-APP_CTX = environ['APP_CTX']
 from cache_responses import (
-    build_cached_json_fname,
     get_entity_json,
     get_metadata_json,
     get_urls
 )
+
+AUTH_TOK = environ['AUTH_TOK']
+APP_CTX = environ['APP_CTX']
 
 logging.basicConfig(encoding="utf-8", level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
@@ -105,11 +99,12 @@ def main() -> None:
                 print_rslt(argfile, None, payload, rslt)
             except requests.exceptions.HTTPError as excp:
                 LOGGER.error(f"ERROR: {excp}")
-                LOGGER.info(f"Error was in response to the following JSON:\n" + pformat(payload))
+                LOGGER.info("Error was in response to the following JSON:\n" + pformat(payload))
         else:
             raise RuntimeError(f"Arg file {argfile} is of an"
                                " unrecognized type")
     LOGGER.info('done')
+
 
 if __name__ == '__main__':
     main()

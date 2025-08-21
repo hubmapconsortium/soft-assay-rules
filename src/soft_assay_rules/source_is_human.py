@@ -2,6 +2,7 @@ import logging
 
 LOGGER = logging.getLogger(__name__)
 
+
 def merge_sources(source_type, this_source_type):
     initial_source_type = source_type  # for diagnostics
     if source_type is None:
@@ -61,7 +62,7 @@ def source_is_human(entity_id_list, fetch_json_fun):
 
             source_type = merge_sources(source_type, this_source_type)
 
-        return source_type.upper() == "HUMAN" # we trapped partial human earlier
+        return source_type.upper() == "HUMAN"  # we trapped partial human earlier
     except AssertionError as excp:
         LOGGER.debug(f"AssertionError, assuming HUMAN: {excp}")
-        return True # fail safe
+        return True  # fail safe

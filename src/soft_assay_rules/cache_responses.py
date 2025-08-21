@@ -1,17 +1,9 @@
 import sys
 import requests
 import json
-import yaml
-import re
 import logging
 from pathlib import Path
-from os.path import isdir, dirname, join
 from os import environ
-from pprint import pformat
-import pandas as pd
-
-from hubmap_commons.exceptions import HTTPException
-from werkzeug.exceptions import HTTPException as WerkzeugException
 
 from source_is_human import source_is_human
 
@@ -29,12 +21,15 @@ def get_urls():
     Returns assaytype_url, entity_url as a tuple
     """
     if APP_CTX == "HUBMAP":
-        #assaytype_url = 'https://ingest-api.test.hubmapconsortium.org/'
-        assaytype_url = 'https://ingest.api.hubmapconsortium.org/'
-        #assaytype_url = 'https://ingest-api.dev.hubmapconsortium.org/'
+        # assaytype_url = 'https://ingest-api.test.hubmapconsortium.org/'
+        # assaytype_url = 'https://ingest.api.hubmapconsortium.org/'
+        # assaytype_url = 'https://ingest-api.dev.hubmapconsortium.org/'
+        assaytype_url = 'http://localhost:5000/'
         entity_url = 'https://entity.api.hubmapconsortium.org/'
+        # entity_url = 'https://entity-api.dev.hubmapconsortium.org/'
     elif APP_CTX == "SENNET":
-        assaytype_url = 'https://ingest.api.sennetconsortium.org/'
+        # assaytype_url = 'https://ingest.api.sennetconsortium.org/'
+        assaytype_url = 'http://localhost:5000/'
         entity_url = 'https://entity.api.sennetconsortium.org/'
         return assaytype_url, entity_url
     else:
@@ -43,7 +38,7 @@ def get_urls():
         else:
             raise RuntimeError("Environment does not contain APP_CTX")
     ubkg_url = 'https://ontology.api.hubmapconsortium.org/'
-    #ubkg_url = 'https://ontology-api.dev.hubmapconsortium.org/'
+    # ubkg_url = 'https://ontology-api.dev.hubmapconsortium.org/'
 
     return assaytype_url, entity_url, ubkg_url
 
@@ -105,14 +100,14 @@ def get_entity_json(ds_uuid: str) -> dict:
     assert AUTH_TOK, "AUTH_TOK was not found in the environment"
     entity_url = get_urls()[1]
     response = requests.get(entity_url + 'entities/' + ds_uuid,
-                            headers={"Authorization":f"Bearer {AUTH_TOK}"}
+                            headers={"Authorization": f"Bearer {AUTH_TOK}"}
                             )
     response.raise_for_status()
-    
+
     return response.json()
 
 
-def get_metadata_json(ds_uuid:str) -> dict:
+def get_metadata_json(ds_uuid: str) -> dict:
     """
     Given a uuid and the (implicit) request, return the
     metadata passed to the rule chain.
@@ -127,11 +122,11 @@ def get_metadata_json(ds_uuid:str) -> dict:
         }
     )
     rply.raise_for_status()
-    
+
     return rply.json()
 
 
-def get_rulechain_json(ds_uuid:str) -> dict:
+def get_rulechain_json(ds_uuid: str) -> dict:
     """
     Given a uuid and the (implicit) request, return the
     the output of the rule chain implementation on the endpoint.
@@ -146,7 +141,7 @@ def get_rulechain_json(ds_uuid:str) -> dict:
         }
     )
     rply.raise_for_status()
-    
+
     return rply.json()
 
 
@@ -191,6 +186,7 @@ def main() -> None:
             except requests.exceptions.HTTPError as excp:
                 LOGGER.error(f"ERROR: {excp}")
     LOGGER.info('done')
+
 
 if __name__ == '__main__':
     main()

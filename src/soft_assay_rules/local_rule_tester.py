@@ -5,12 +5,11 @@ uuid lookup, but it provides support for CI tests.
 """
 
 import sys
-import requests
 import json
 import logging
 from collections.abc import Callable
 from pathlib import Path
-from pprint import pprint, pformat
+from pprint import pformat
 import pandas as pd
 
 from source_is_human import source_is_human
@@ -21,10 +20,7 @@ from test_utils import print_rslt
 
 from rule_chain import (
     RuleLoader,
-    RuleChain,
     NoMatchException,
-    RuleSyntaxException,
-    RuleLogicException,
 )
 
 logging.basicConfig(encoding="utf-8")
@@ -210,9 +206,9 @@ def main() -> None:
                     is_human = source_is_human([uuid], wrapped_lookup_entity_json)
                     LOGGER.info(f"source_is_human for [{uuid}] returns {is_human}")
                     payload = wrapped_lookup_metadata_json(uuid)
-                    LOGGER.debug(f"PAYLOAD: \n" + pformat(payload))
+                    LOGGER.debug("PAYLOAD: \n" + pformat(payload))
                     cached_rslt = wrapped_lookup_rulechain_json(uuid)
-                    LOGGER.debug(f"EXPECTED RESULT: \n" + pformat(cached_rslt))
+                    LOGGER.debug("EXPECTED RESULT: \n" + pformat(cached_rslt))
                     rslt = calculate_assay_info(payload, is_human, wrapped_lookup_ubkg_json)
                     for elt in rslt:
                         val = rslt[elt]
@@ -242,13 +238,14 @@ def main() -> None:
                 # version, so the payload should be complete- no added elements
                 # needed.  But we have no way to tell if the source was human,
                 # so assume that it is human.
-                LOGGER.debug(f"RELOADED PAYLOAD: \n" + pformat(payload))
+                LOGGER.debug("RELOADED PAYLOAD: \n" + pformat(payload))
                 rslt = calculate_assay_info(payload, True, wrapped_lookup_ubkg_json)
                 print_rslt(argfile, 0, payload, rslt)
         else:
             raise RuntimeError(f"Arg file {argfile} is of an"
                                " unrecognized type")
     LOGGER.info('done')
+
 
 if __name__ == '__main__':
     main()

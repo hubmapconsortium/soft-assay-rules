@@ -1,13 +1,8 @@
 import sys
 import requests
-import json
 import logging
 from os import environ
 from pprint import pformat
-import pandas as pd
-
-from hubmap_commons.exceptions import HTTPException
-from werkzeug.exceptions import HTTPException as WerkzeugException
 
 from cache_responses import get_ubkg_json, save_ubkg_json
 
@@ -33,6 +28,7 @@ def main() -> None:
             except requests.exceptions.HTTPError as excp:
                 LOGGER.error(f"ERROR: {excp}")
     LOGGER.info('done')
+
 
 if __name__ == '__main__':
     main()
