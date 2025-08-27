@@ -1,6 +1,7 @@
 import json
 from pprint import pprint
 
+
 def print_rslt(argfile, idx, payload, rslt, show_payload=False):
     """
     This just summarizes the results of a test case to stdout
@@ -17,5 +18,3 @@ def print_rslt(argfile, idx, payload, rslt, show_payload=False):
             print("NOT MAPPED!")
             print("Payload follows")
             pprint(payload)
-
-
